@@ -77,10 +77,12 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
     func blePeripheral(characteristicRead byteArray: [UInt8], characteristic: CBCharacteristic, blePeripheral: BlePeripheral) {
     
         for i in 1...(byteArray.count/9) {
-            guard byteArray[i*9-9] + byteArray[i*9-8] + byteArray[i*9-7] == 192 else { continue }
-            waveformArea.pushSignal1BySliding(newValue: CGFloat(UInt16(byteArray[i*9-6])<<8
-                    + UInt16(byteArray[i*9-5])))
-            signal1Value.text = String(UInt16(byteArray[i*9-6])<<8 + UInt16(byteArray[i*9-5]))
+            guard byteArray[i*9-9] & 0xC0 == 0xC0 else { continue }
+            // Update the signal value of channel 1
+            waveformArea.pushSignal1BySliding(newValue: CGFloat(UInt16(byteArray[i*9-5])<<8
+                    + UInt16(byteArray[i*9-4])))
+            signal1Value.text = String(UInt16(byteArray[i*9-5])<<8 + UInt16(byteArray[i*9-4]))
+            // Update the signal value of channel 2
             waveformArea.pushSignal2BySliding(newValue: CGFloat(UInt16(byteArray[i*9-3])<<8
                     + UInt16(byteArray[i*9-2])))
             signal2Value.text = String(UInt16(byteArray[i*9-3])<<8 + UInt16(byteArray[i*9-2]))
