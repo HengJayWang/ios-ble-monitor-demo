@@ -81,11 +81,11 @@ class WaveformView: UIView {
         let signal1 = UIBezierPath()
         signal1.lineWidth = 1.5
         signal1.move(to: CGPoint(x: origin.x,
-                                   y: origin.y - height*0.4*(signal1Data[0]/CGFloat(UINT16_MAX))))
+                                   y: origin.y - height * 0.4 * signal1Data[0] / CGFloat(UINT16_MAX)))
         
         for i in 1...signal1Data.count-1 {
             signal1.addLine(to: CGPoint(x: origin.x + stepX * CGFloat(i),
-                                       y: origin.y - height*0.4*(signal1Data[i]/CGFloat(UINT16_MAX))))
+                                       y: origin.y - height * 0.4 * signal1Data[i] / CGFloat(UINT16_MAX)))
         }
         UIColor.cyan.setStroke()
         signal1.stroke()
@@ -96,11 +96,11 @@ class WaveformView: UIView {
         let signal2 = UIBezierPath()
         signal2.lineWidth = 1.5
         signal2.move(to: CGPoint(x: origin2.x,
-                                   y: origin2.y - height*0.4*(signal2Data[0]/CGFloat(UINT16_MAX))))
+                                   y: origin2.y - height*0.4*signal2Data[0]/CGFloat(UINT16_MAX)))
         
         for i in 1...signal2Data.count-1 {
             signal2.addLine(to: CGPoint(x: origin2.x + stepX * CGFloat(i),
-                                          y: origin2.y - height*0.4*(signal2Data[i]/CGFloat(UINT16_MAX))))
+                                          y: origin2.y - height*0.4*signal2Data[i]/CGFloat(UINT16_MAX)))
         }
         UIColor.red.setStroke()
         signal2.stroke()

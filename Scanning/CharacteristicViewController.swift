@@ -8,6 +8,13 @@
 
 import UIKit
 import CoreBluetooth
+import Foundation
+
+extension FileManager {
+    static var documentDirectoryURL: URL {
+        return FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+    }
+}
 
 /**
  This view talks to a Characteristic
@@ -37,7 +44,14 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
     // Connected Characteristic
     var connectedCharacteristic: CBCharacteristic!
     
+    // Received Data Buffer
+    var receivedData = [UInt8]()
     
+    // URL for save the received Data
+    let receivedDataURL = URL(
+        fileURLWithPath: "receivedData",
+        relativeTo: FileManager.documentDirectoryURL
+    )
     
     /**
      UIView loaded
@@ -58,6 +72,18 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
     @IBAction func notifyCharacteristic(_ sender: UISwitch) {
         print("notify the characteristic is \(sender.isOn)")
         blePeripheral.peripheral.setNotifyValue(sender.isOn, for: connectedCharacteristic)
+        if !sender.isOn {
+            // Create the Data instance
+            let myData = Data(bytes: receivedData)
+            print("Create the Data instance myData: \(myData)")
+            // Write data to the specific directory
+            do {
+                try myData.write(to: receivedDataURL)
+                print("Save data to URL: \(receivedDataURL)")
+            } catch {
+                print(error)
+            }
+        }
     }
     /**
      Load UI elements
@@ -76,16 +102,18 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
      */
     func blePeripheral(characteristicRead byteArray: [UInt8], characteristic: CBCharacteristic, blePeripheral: BlePeripheral) {
     
+        receivedData += byteArray
+        
         for i in 1...(byteArray.count/9) {
             guard byteArray[i*9-9] & 0xC0 == 0xC0 else { continue }
             // Update the signal value of channel 1
-            waveformArea.pushSignal1BySliding(newValue: CGFloat(UInt16(byteArray[i*9-5])<<8
-                    + UInt16(byteArray[i*9-4])))
-            signal1Value.text = String(UInt16(byteArray[i*9-5])<<8 + UInt16(byteArray[i*9-4]))
+            waveformArea.pushSignal1BySliding(newValue: CGFloat(Int32(byteArray[i*9-5])<<8
+                    + Int32(byteArray[i*9-4])))
+            signal1Value.text = String(Int32(byteArray[i*9-5])<<8 + Int32(byteArray[i*9-4]))
             // Update the signal value of channel 2
-            waveformArea.pushSignal2BySliding(newValue: CGFloat(UInt16(byteArray[i*9-3])<<8
-                    + UInt16(byteArray[i*9-2])))
-            signal2Value.text = String(UInt16(byteArray[i*9-3])<<8 + UInt16(byteArray[i*9-2]))
+            waveformArea.pushSignal2BySliding(newValue: CGFloat(Int32(byteArray[i*9-3])<<8
+                    + Int32(byteArray[i*9-2])))
+            signal2Value.text = String(Int32(byteArray[i*9-3])<<8 + Int32(byteArray[i*9-2]))
         }
     }
 
