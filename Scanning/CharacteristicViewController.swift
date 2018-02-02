@@ -104,16 +104,15 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
     
         receivedData += byteArray
         
-        for i in 1...(byteArray.count/9) {
-            guard byteArray[i*9-9] & 0xC0 == 0xC0 else { continue }
+        for i in 1...(byteArray.count/4) {
             // Update the signal value of channel 1
-            waveformArea.pushSignal1BySliding(newValue: CGFloat(Int32(byteArray[i*9-5])<<8
-                    + Int32(byteArray[i*9-4])))
-            signal1Value.text = String(Int32(byteArray[i*9-5])<<8 + Int32(byteArray[i*9-4]))
+            let ch1Value = Int32(byteArray[i*4-4]) << 8 + Int32(byteArray[i*4-3])
+            waveformArea.pushSignal1BySliding(newValue: CGFloat(ch1Value))
+            signal1Value.text = String(ch1Value)
             // Update the signal value of channel 2
-            waveformArea.pushSignal2BySliding(newValue: CGFloat(Int32(byteArray[i*9-3])<<8
-                    + Int32(byteArray[i*9-2])))
-            signal2Value.text = String(Int32(byteArray[i*9-3])<<8 + Int32(byteArray[i*9-2]))
+            let ch2Value = Int32(byteArray[i*4-2]) << 8 + Int32(byteArray[i*4-1])
+            waveformArea.pushSignal2BySliding(newValue: CGFloat(ch2Value))
+            signal2Value.text = String(ch2Value)
         }
     }
 
