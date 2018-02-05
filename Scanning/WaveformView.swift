@@ -17,17 +17,17 @@ class WaveformView: UIView {
         static let signalLineWidth: CGFloat = 4.0
     }
     
-    var signal1Data: [CGFloat] = Array(repeating: CGFloat(UINT16_MAX >> 1), count: 1000) {
+    var signal1Data = [CGFloat](repeating: CGFloat(UINT16_MAX >> 1), count: 2500) {
         didSet {
-            setNeedsDisplay()
+            if (signal1Index + 1) % 50 == 0 { setNeedsDisplay() }
         }
     }
     
     var signal1Index: Int = 0
 
-    var signal2Data: [CGFloat] = Array(repeating: CGFloat(UINT16_MAX >> 1), count: 1000) {
+    var signal2Data = [CGFloat](repeating: CGFloat(UINT16_MAX >> 1), count: 2500) {
         didSet {
-            setNeedsDisplay()
+            if (signal2Index + 1) % 50 == 0 { setNeedsDisplay() }
         }
     }
     
@@ -80,27 +80,32 @@ class WaveformView: UIView {
         
         let signal1 = UIBezierPath()
         signal1.lineWidth = 1.5
+        let ch1Min = signal1Data.min()!
+        let ch1Scale = (signal1Data.max()! - ch1Min + 1)
+        print("ch1 max: \(signal1Data.max()!) min: \(ch1Min) ")
         signal1.move(to: CGPoint(x: origin.x,
-                                 y: origin.y - height * 0.4 * signal1Data[0] / CGFloat(UINT16_MAX)))
+                                 y: origin.y - height * 0.4 * (signal1Data[0] - ch1Min) / ch1Scale))
         
         for i in 1...signal1Data.count-1 {
             signal1.addLine(to: CGPoint(x: origin.x + stepX * CGFloat(i),
-                                        y: origin.y - height * 0.4 * signal1Data[i] / CGFloat(UINT16_MAX)))
+                                        y: origin.y - height * 0.4 * (signal1Data[i] - ch1Min) / ch1Scale))
         }
         UIColor.cyan.setStroke()
         signal1.stroke()
         
         //draw waveform of signalPPG
         let origin2 = CGPoint(x: width * (1 - graphWidth) / 2, y: height * 0.95 )
-        
         let signal2 = UIBezierPath()
         signal2.lineWidth = 1.5
+        let ch2Min = signal2Data.min()!
+        let ch2Scale = (signal2Data.max()! - ch2Min + 1)
+        print("ch2 max: \(signal2Data.max()!) min: \(ch2Min) ")
         signal2.move(to: CGPoint(x: origin2.x,
-                                 y: origin2.y - height * 0.4 * signal2Data[0] / CGFloat(UINT16_MAX)))
+                                 y: origin2.y - height * 0.4 * (signal2Data[0] - ch2Min) / ch2Scale))
         
         for i in 1...signal2Data.count-1 {
             signal2.addLine(to: CGPoint(x: origin2.x + stepX * CGFloat(i),
-                                        y: origin2.y - height * 0.4 * signal2Data[i] / CGFloat(UINT16_MAX)))
+                                        y: origin2.y - height * 0.4 * (signal2Data[i] - ch2Min) / ch2Scale))
         }
         UIColor.red.setStroke()
         signal2.stroke()

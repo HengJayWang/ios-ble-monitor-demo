@@ -9,12 +9,12 @@
 import UIKit
 import CoreBluetooth
 import Foundation
-
+/*
 extension FileManager {
     static var documentDirectoryURL: URL {
         return FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
     }
-}
+}*/
 
 /**
  This view talks to a Characteristic
@@ -48,10 +48,11 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
     var receivedData = [UInt8]()
     
     // URL for save the received Data
+    /*
     let receivedDataURL = URL(
         fileURLWithPath: "receivedData",
         relativeTo: FileManager.documentDirectoryURL
-    )
+    )*/
     
     /**
      UIView loaded
@@ -74,6 +75,7 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
         blePeripheral.peripheral.setNotifyValue(sender.isOn, for: connectedCharacteristic)
         if !sender.isOn {
             // Create the Data instance
+            /*
             let myData = Data(bytes: receivedData)
             print("Create the Data instance myData: \(myData)")
             // Write data to the specific directory
@@ -82,7 +84,7 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
                 print("Save data to URL: \(receivedDataURL)")
             } catch {
                 print(error)
-            }
+            }*/
         }
     }
     /**
@@ -106,11 +108,11 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
         
         for i in 1...(byteArray.count/4) {
             // Update the signal value of channel 1
-            let ch1Value = Int32(byteArray[i*4-4]) << 8 + Int32(byteArray[i*4-3])
+            let ch1Value = Int32(byteArray[i*4-3]) << 8 + Int32(byteArray[i*4-4])
             waveformArea.pushSignal1BySliding(newValue: CGFloat(ch1Value))
             signal1Value.text = String(ch1Value)
             // Update the signal value of channel 2
-            let ch2Value = Int32(byteArray[i*4-2]) << 8 + Int32(byteArray[i*4-1])
+            let ch2Value = Int32(byteArray[i*4-1]) << 8 + Int32(byteArray[i*4-2])
             waveformArea.pushSignal2BySliding(newValue: CGFloat(ch2Value))
             signal2Value.text = String(ch2Value)
         }

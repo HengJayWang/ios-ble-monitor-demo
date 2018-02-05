@@ -119,9 +119,9 @@ class BlePeripheral: NSObject, CBPeripheralDelegate {
             
             // Note: if we need to work with byte arrays instead of Strings, we can do this
             let byteArray = [UInt8](value)
-            print("byteArray is:")
+            /*print("byteArray is:")
             print(byteArray)
-            print("Array length is \(byteArray.count)")
+            print("Array length is \(byteArray.count)")*/
             delegate?.blePeripheral?(characteristicRead: byteArray, characteristic: characteristic, blePeripheral: self)
             
             // or this:
