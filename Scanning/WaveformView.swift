@@ -19,7 +19,7 @@ class WaveformView: UIView {
     
     var signal1Data = [CGFloat](repeating: CGFloat(UINT16_MAX >> 1), count: 2500) {
         didSet {
-            if (signal1Index + 1) % 50 == 0 { setNeedsDisplay() }
+            if (signal1Index + 1) % 250 == 0 { setNeedsDisplay() }
         }
     }
     
@@ -27,7 +27,7 @@ class WaveformView: UIView {
 
     var signal2Data = [CGFloat](repeating: CGFloat(UINT16_MAX >> 1), count: 2500) {
         didSet {
-            if (signal2Index + 1) % 50 == 0 { setNeedsDisplay() }
+            if (signal2Index + 1) % 250 == 0 { setNeedsDisplay() }
         }
     }
     
@@ -82,7 +82,7 @@ class WaveformView: UIView {
         signal1.lineWidth = 1.5
         let ch1Min = signal1Data.min()!
         let ch1Scale = (signal1Data.max()! - ch1Min + 1)
-        print("ch1 max: \(signal1Data.max()!) min: \(ch1Min) ")
+    
         signal1.move(to: CGPoint(x: origin.x,
                                  y: origin.y - height * 0.4 * (signal1Data[0] - ch1Min) / ch1Scale))
         
@@ -99,7 +99,7 @@ class WaveformView: UIView {
         signal2.lineWidth = 1.5
         let ch2Min = signal2Data.min()!
         let ch2Scale = (signal2Data.max()! - ch2Min + 1)
-        print("ch2 max: \(signal2Data.max()!) min: \(ch2Min) ")
+        
         signal2.move(to: CGPoint(x: origin2.x,
                                  y: origin2.y - height * 0.4 * (signal2Data[0] - ch2Min) / ch2Scale))
         

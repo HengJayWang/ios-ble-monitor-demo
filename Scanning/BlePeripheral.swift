@@ -114,7 +114,7 @@ class BlePeripheral: NSObject, CBPeripheralDelegate {
      Value downloaded from Characteristic on connected Peripheral
      */
     func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
-        print("characteristic updated")
+        
         if let value = characteristic.value {
             
             // Note: if we need to work with byte arrays instead of Strings, we can do this
