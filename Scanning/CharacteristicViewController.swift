@@ -108,11 +108,11 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
         
         for i in 1...(byteArray.count/4) {
             // Update the signal value of channel 1
-            let ch1Value = Int32(byteArray[i*4-3]) << 8 + Int32(byteArray[i*4-4])
+            let ch1Value = Int16(byteArray[i*4-3]) << 8 + Int16(byteArray[i*4-4])
             waveformArea.pushSignal1BySliding(newValue: CGFloat(ch1Value))
             signal1Value.text = String(ch1Value)
             // Update the signal value of channel 2
-            let ch2Value = Int32(byteArray[i*4-1]) << 8 + Int32(byteArray[i*4-2])
+            let ch2Value = Int16(byteArray[i*4-1]) << 8 + Int16(byteArray[i*4-2])
             waveformArea.pushSignal2BySliding(newValue: CGFloat(ch2Value))
             signal2Value.text = String(ch2Value)
         }
