@@ -29,6 +29,9 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
     @IBOutlet weak var waveformArea: WaveformView!
     @IBOutlet weak var signal1Value: UILabel!
     @IBOutlet weak var signal2Value: UILabel!
+    @IBOutlet weak var writeCharacteristicButton: UIButton!
+    @IBOutlet weak var writeCharacteristicTextField: UITextField!
+    
     
     // MARK: Connected devices
     
@@ -73,19 +76,7 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
     @IBAction func notifyCharacteristic(_ sender: UISwitch) {
         print("notify the characteristic is \(sender.isOn)")
         blePeripheral.peripheral.setNotifyValue(sender.isOn, for: connectedCharacteristic)
-        if !sender.isOn {
-            // Create the Data instance
-            /*
-            let myData = Data(bytes: receivedData)
-            print("Create the Data instance myData: \(myData)")
-            // Write data to the specific directory
-            do {
-                try myData.write(to: receivedDataURL)
-                print("Save data to URL: \(receivedDataURL)")
-            } catch {
-                print(error)
-            }*/
-        }
+        
     }
     /**
      Load UI elements
@@ -94,8 +85,25 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
         advertizedNameLabel.text = blePeripheral.advertisedName
         identifierLabel.text = blePeripheral.peripheral.identifier.uuidString
         characteristicUuidlabel.text = connectedCharacteristic.uuid.uuidString
+        
+        // characteristic is not writeable
+        if !BlePeripheral.isCharacteristic(isWriteable: connectedCharacteristic) {
+            writeCharacteristicTextField.isHidden = true
+            writeCharacteristicButton.isHidden = true
+        }
+        
     }
 
+    @IBAction func writeCharacteristic(_ sender: UIButton) {
+        print("write button pressed")
+        writeCharacteristicButton.isEnabled = false
+        if let stringValue = writeCharacteristicTextField.text {
+            print(stringValue)
+            blePeripheral.writeValue(value: stringValue, to: connectedCharacteristic)
+            writeCharacteristicTextField.text = ""
+        }
+        writeCharacteristicButton.isEnabled = true
+    }
     
     // MARK: BlePeripheralDelegate
     

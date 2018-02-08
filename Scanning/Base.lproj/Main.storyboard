@@ -157,8 +157,15 @@
                                                     <nil key="textColor"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Writeable" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="BoK-Je-DbM">
+                                                    <rect key="frame" x="77" y="55" width="60" height="21"/>
+                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                                    <fontDescription key="fontDescription" type="system" pointSize="13"/>
+                                                    <nil key="textColor"/>
+                                                    <nil key="highlightedColor"/>
+                                                </label>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="No Access" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="GJY-9a-fQc">
-                                                    <rect key="frame" x="77" y="55" width="65" height="21"/>
+                                                    <rect key="frame" x="145" y="55" width="65" height="21"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                                     <accessibility key="accessibilityConfiguration" identifier="permissionsLabel"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="13"/>
@@ -172,6 +179,7 @@
                                             <outlet property="noAccessLabel" destination="GJY-9a-fQc" id="Tmg-ZB-ZVY"/>
                                             <outlet property="readableLabel" destination="LEk-dp-SaB" id="x3o-YS-Tdw"/>
                                             <outlet property="uuidLabel" destination="zKv-IZ-A8h" id="KE8-3G-GKZ"/>
+                                            <outlet property="writeableLabel" destination="BoK-Je-DbM" id="lFA-gV-5jc"/>
                                             <segue destination="GH7-Cy-70i" kind="show" identifier="LoadCharacteristicViewSegue" id="2fY-7V-Six"/>
                                         </connections>
                                     </tableViewCell>
@@ -334,14 +342,40 @@
                                     <constraint firstAttribute="width" secondItem="7zr-5a-2WU" secondAttribute="height" multiplier="288:215" id="OaZ-kG-ITV"/>
                                 </constraints>
                             </view>
+                            <stackView opaque="NO" contentMode="scaleToFill" fixedFrame="YES" spacing="10" translatesAutoresizingMaskIntoConstraints="NO" id="52L-5A-zY0">
+                                <rect key="frame" x="16" y="262" width="253" height="34"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <subviews>
+                                    <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="w05-D3-zZn">
+                                        <rect key="frame" x="0.0" y="0.0" width="200" height="34"/>
+                                        <constraints>
+                                            <constraint firstAttribute="width" constant="200" id="G4j-Tq-Rkr"/>
+                                            <constraint firstAttribute="height" constant="34" id="cEK-l3-Ful"/>
+                                        </constraints>
+                                        <nil key="textColor"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                        <textInputTraits key="textInputTraits"/>
+                                    </textField>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ohE-CH-ZnG">
+                                        <rect key="frame" x="210" y="0.0" width="43" height="34"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="18"/>
+                                        <state key="normal" title="Write"/>
+                                        <connections>
+                                            <action selector="writeCharacteristic:" destination="GH7-Cy-70i" eventType="touchUpInside" id="hTD-J6-foc"/>
+                                        </connections>
+                                    </button>
+                                </subviews>
+                            </stackView>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
                             <constraint firstItem="3cW-hr-aY7" firstAttribute="leading" secondItem="3Vb-gs-rWZ" secondAttribute="leadingMargin" id="3nR-C9-NmX"/>
                             <constraint firstAttribute="trailing" secondItem="7zr-5a-2WU" secondAttribute="trailing" constant="16" id="FlQ-lQ-Z8g"/>
+                            <constraint firstItem="w05-D3-zZn" firstAttribute="leading" secondItem="3Vb-gs-rWZ" secondAttribute="leading" constant="16" id="HOO-P4-W6e"/>
                             <constraint firstItem="AyN-j5-YkV" firstAttribute="top" secondItem="7zr-5a-2WU" secondAttribute="bottom" constant="20" id="NsD-ut-9By"/>
                             <constraint firstItem="7zr-5a-2WU" firstAttribute="leading" secondItem="3Vb-gs-rWZ" secondAttribute="leading" constant="16" id="Tdf-ze-64Z"/>
                             <constraint firstAttribute="trailingMargin" secondItem="3cW-hr-aY7" secondAttribute="trailing" id="Xzi-sm-UyA"/>
+                            <constraint firstItem="w05-D3-zZn" firstAttribute="top" secondItem="4FQ-6b-rUH" secondAttribute="bottom" constant="8" id="ixA-T1-CeE"/>
                             <constraint firstItem="4FQ-6b-rUH" firstAttribute="top" secondItem="3cW-hr-aY7" secondAttribute="bottom" constant="8" id="rA0-zb-9Ou"/>
                             <constraint firstItem="4FQ-6b-rUH" firstAttribute="leading" secondItem="3Vb-gs-rWZ" secondAttribute="leading" constant="16" id="vC6-bg-r60"/>
                             <constraint firstItem="3cW-hr-aY7" firstAttribute="top" secondItem="ja3-NX-REo" secondAttribute="bottom" constant="8" id="vgs-tL-gBa"/>
@@ -354,6 +388,8 @@
                         <outlet property="signal1Value" destination="yuU-yf-Qyy" id="W5l-58-a8k"/>
                         <outlet property="signal2Value" destination="L7w-CB-TI2" id="pLh-JJ-5Vg"/>
                         <outlet property="waveformArea" destination="7zr-5a-2WU" id="fqE-SX-2GG"/>
+                        <outlet property="writeCharacteristicButton" destination="ohE-CH-ZnG" id="nGb-rd-esI"/>
+                        <outlet property="writeCharacteristicTextField" destination="w05-D3-zZn" id="NsB-1C-c8H"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Eqg-Nx-ChQ" userLabel="First Responder" sceneMemberID="firstResponder"/>

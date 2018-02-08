@@ -26,6 +26,9 @@ class BlePeripheral: NSObject, CBPeripheralDelegate {
     // advertised name
     var advertisedName:String!
     
+    // the size of the characteristic
+    let characteristicLength = 20
+    
     // RSSI
     var rssi:NSNumber!
     
@@ -91,6 +94,47 @@ class BlePeripheral: NSObject, CBPeripheralDelegate {
         self.peripheral.readValue(for: characteristic)
     }
     
+    /**
+     Write to Characteristic
+     */
+    func writeValue(value: String, to characteristic: CBCharacteristic) {
+        
+        let byteValue = Array(value.utf8)
+        
+        // cap the outbound value length to be less than the characteristic length
+        var length = byteValue.count
+        if length > characteristicLength {
+            length = characteristicLength
+        }
+        
+        let transmissableValue = Data(Array(byteValue[0..<length]))
+        
+        print(transmissableValue)
+        
+        var writeType = CBCharacteristicWriteType.withResponse
+        if BlePeripheral.isCharacteristic(isWriteableWithoutResponse: characteristic) {
+            writeType = CBCharacteristicWriteType.withoutResponse
+        }
+        
+        peripheral.writeValue(transmissableValue, for: characteristic, type: writeType)
+        
+        print("write request sent")
+    }
+    
+    /**
+     Check if Characteristic is writeable without response
+     
+     - Parameters:
+     - characteristic: The Characteristic to test
+     
+     - returns: True if characteristic is writeable without response
+     */
+    static func isCharacteristic(isWriteableWithoutResponse characteristic: CBCharacteristic) -> Bool {
+        if (characteristic.properties.rawValue & CBCharacteristicProperties.writeWithoutResponse.rawValue) != 0 {
+            return true
+        }
+        return false
+    }
     
     /**
      Check if Characteristic is readable
@@ -102,6 +146,22 @@ class BlePeripheral: NSObject, CBPeripheralDelegate {
      */
     static func isCharacteristic(isReadable characteristic: CBCharacteristic) -> Bool {
         if (characteristic.properties.rawValue & CBCharacteristicProperties.read.rawValue) != 0 {
+            return true
+        }
+        return false
+    }
+    
+    /**
+     Check if Characteristic is writeable
+     
+     - Parameters:
+     - characteristic: The Characteristic to test
+     
+     - returns: True if characteristic is writeable
+     */
+    static func isCharacteristic(isWriteable characteristic: CBCharacteristic) -> Bool {
+        if (characteristic.properties.rawValue & CBCharacteristicProperties.write.rawValue) != 0 ||
+            (characteristic.properties.rawValue & CBCharacteristicProperties.writeWithoutResponse.rawValue) != 0 {
             return true
         }
         return false
