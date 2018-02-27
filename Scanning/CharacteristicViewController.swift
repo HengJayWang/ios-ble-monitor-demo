@@ -98,13 +98,25 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
         print("write button pressed")
         writeCharacteristicButton.isEnabled = false
         if let stringValue = writeCharacteristicTextField.text {
-            print(stringValue)
+            print("stringValue is \(stringValue)")
             blePeripheral.writeValue(value: stringValue, to: connectedCharacteristic)
             writeCharacteristicTextField.text = ""
         }
         writeCharacteristicButton.isEnabled = true
     }
     
+    @IBAction func writeTestText(_ sender: UIButton) {
+        switch sender.tag {
+        case 1:
+            writeCharacteristicTextField.text = "ITRIITRIITRIITRI"
+        case 2:
+            writeCharacteristicTextField.text = "M200M200M200M200"
+        case 3:
+            writeCharacteristicTextField.text = "TestTestTestTest"
+        default:
+            writeCharacteristicTextField.text = ""
+        }
+    }
     // MARK: BlePeripheralDelegate
     
     /**

@@ -109,7 +109,7 @@ class BlePeripheral: NSObject, CBPeripheralDelegate {
         
         let transmissableValue = Data(Array(byteValue[0..<length]))
         
-        print(transmissableValue)
+        print("transmissableValue is \(transmissableValue)")
         
         var writeType = CBCharacteristicWriteType.withResponse
         if BlePeripheral.isCharacteristic(isWriteableWithoutResponse: characteristic) {
