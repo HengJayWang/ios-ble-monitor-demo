@@ -106,16 +106,10 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
     }
     
     @IBAction func writeTestText(_ sender: UIButton) {
-        switch sender.tag {
-        case 1:
-            writeCharacteristicTextField.text = "ITRIITRIITRIITRI"
-        case 2:
-            writeCharacteristicTextField.text = "M200M200M200M200"
-        case 3:
-            writeCharacteristicTextField.text = "TestTestTestTest"
-        default:
-            writeCharacteristicTextField.text = ""
-        }
+        
+        let str: [String] = ["","ITRIITRIITRIITRI","M200M200M200M200","TestTestTestTest"]
+        writeCharacteristicTextField.text = str[sender.tag]
+        
     }
     // MARK: BlePeripheralDelegate
     
