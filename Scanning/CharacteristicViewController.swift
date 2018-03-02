@@ -104,12 +104,17 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
         }
         writeCharacteristicButton.isEnabled = true
     }
+    var cmdData : [Bool] = [false, false, false, false, false]
     
     @IBAction func writeTestText(_ sender: UIButton) {
         
-        let str: [String] = ["","ITRIITRIITRIITRI","M200M200M200M200","TestTestTestTest"]
-        writeCharacteristicTextField.text = str[sender.tag]
-        
+        let header = "49545249"
+        let cmdType : [String] = ["AB01","AB02","AB03","AB04","AB05"]
+        let cmdDataValue = cmdData[sender.tag] ? "0002" : "0001"
+        let comment = "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+            
+        writeCharacteristicTextField.text = header + cmdType[sender.tag] + cmdDataValue + comment
+        cmdData[sender.tag] = !cmdData[sender.tag]
     }
     // MARK: BlePeripheralDelegate
     

@@ -9,6 +9,19 @@
 import UIKit
 import CoreBluetooth
 
+extension String {
+    var count: Int {
+        return self.characters.count
+    }
+    
+    subscript (i: Int) -> Character {
+        return self[index(startIndex, offsetBy: i)]
+    }
+    
+    subscript (i: Int) -> String {
+        return String(self[i] as Character)
+    }
+}
 
 /**
  BlePeripheral Handles communication with a Bluetooth Low Energy Peripheral
@@ -27,7 +40,7 @@ class BlePeripheral: NSObject, CBPeripheralDelegate {
     var advertisedName:String!
     
     // the size of the characteristic
-    let characteristicLength = 20
+    let characteristicLength = 32
     
     // RSSI
     var rssi:NSNumber!
@@ -95,12 +108,26 @@ class BlePeripheral: NSObject, CBPeripheralDelegate {
     }
     
     /**
+     Hex String to ByteArray
+     */
+ 
+    func hexStrToByteArray( hexStr: String ) -> [UInt8] {
+        var result = [UInt8](repeating: 0, count: hexStr.count/2 )
+        for i in 1...(hexStr.count)/2 {
+            let str = hexStr[2*i-2]+hexStr[2*i-1]
+            result[i-1] = UInt8(str, radix:16)!
+        }
+        return result
+    }
+    
+    /**
      Write to Characteristic
      */
     func writeValue(value: String, to characteristic: CBCharacteristic) {
         
-        let byteValue = Array(value.utf8)
-        
+        let byteValue = hexStrToByteArray(hexStr: value)
+        print("byteValue is \(byteValue)")
+        print("byteValue count is \(byteValue.count)")
         // cap the outbound value length to be less than the characteristic length
         var length = byteValue.count
         if length > characteristicLength {
