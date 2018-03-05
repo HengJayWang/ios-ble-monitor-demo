@@ -2,8 +2,8 @@
 //  GattTableViewCell.swift
 //  Services
 //
-//  Created by Adonis Gaitatzis on 11/21/16.
-//  Copyright © 2016 Adonis Gaitatzis. All rights reserved.
+//  Created by Created by HengJay on 2017/12/04.
+//  Copyright © 2017 ITRI All rights reserved.
 //
 
 import UIKit

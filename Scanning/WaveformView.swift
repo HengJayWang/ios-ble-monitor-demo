@@ -3,7 +3,7 @@
 //  ReadCharacteristic
 //
 //  Created by HengJay on 2018/1/19.
-//  Copyright © 2018年 All rights reserved.
+//  Copyright © 2018 ITRI All rights reserved.
 //
 
 import UIKit

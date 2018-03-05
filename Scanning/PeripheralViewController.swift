@@ -2,8 +2,8 @@
 //  ViewController.swift
 //  Bootstrapping
 //
-//  Created by Adonis Gaitatzis on 11/15/16.
-//  Copyright © 2016 Adonis Gaitatzis. All rights reserved.
+//  Created by Created by HengJay on 2017/12/04.
+//  Copyright © 2017 ITRI All rights reserved.
 //
 
 import UIKit

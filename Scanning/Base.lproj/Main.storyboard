@@ -134,7 +134,7 @@
                                     <constraint firstAttribute="width" secondItem="XXk-lT-aKP" secondAttribute="height" multiplier="7:5" id="9j6-HV-Sax"/>
                                 </constraints>
                                 <prototypes>
-                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" misplaced="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="GattTableViewCell" rowHeight="90" id="4Wp-0d-wwZ" customClass="GattTableViewCell" customModule="ReadCharacteristic" customModuleProvider="target">
+                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="GattTableViewCell" rowHeight="90" id="4Wp-0d-wwZ" customClass="GattTableViewCell" customModule="ReadCharacteristic" customModuleProvider="target">
                                         <rect key="frame" x="0.0" y="55.5" width="768" height="90"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="4Wp-0d-wwZ" id="qDs-fT-QAG">
@@ -343,13 +343,13 @@
                                 </constraints>
                             </view>
                             <stackView opaque="NO" contentMode="scaleToFill" fixedFrame="YES" spacing="21" translatesAutoresizingMaskIntoConstraints="NO" id="52L-5A-zY0">
-                                <rect key="frame" x="16" y="232" width="618" height="34"/>
+                                <rect key="frame" x="16" y="232" width="668" height="34"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <subviews>
                                     <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="w05-D3-zZn">
-                                        <rect key="frame" x="0.0" y="0.0" width="550" height="34"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="600" height="34"/>
                                         <constraints>
-                                            <constraint firstAttribute="width" constant="550" id="G4j-Tq-Rkr"/>
+                                            <constraint firstAttribute="width" constant="600" id="G4j-Tq-Rkr"/>
                                             <constraint firstAttribute="height" constant="34" id="cEK-l3-Ful"/>
                                         </constraints>
                                         <nil key="textColor"/>
@@ -357,7 +357,7 @@
                                         <textInputTraits key="textInputTraits"/>
                                     </textField>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ohE-CH-ZnG">
-                                        <rect key="frame" x="571" y="0.0" width="47" height="34"/>
+                                        <rect key="frame" x="621" y="0.0" width="47" height="34"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="20"/>
                                         <state key="normal" title="Write"/>
                                         <connections>
@@ -366,8 +366,8 @@
                                     </button>
                                 </subviews>
                             </stackView>
-                            <stackView opaque="NO" contentMode="scaleToFill" spacing="20" translatesAutoresizingMaskIntoConstraints="NO" id="hfV-r9-TAz">
-                                <rect key="frame" x="16" y="266" width="440" height="36"/>
+                            <stackView opaque="NO" contentMode="scaleToFill" spacing="15" translatesAutoresizingMaskIntoConstraints="NO" id="hfV-r9-TAz">
+                                <rect key="frame" x="16" y="266" width="672" height="36"/>
                                 <subviews>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="4zW-Ns-dXx">
                                         <rect key="frame" x="0.0" y="0.0" width="62" height="36"/>
@@ -378,7 +378,7 @@
                                         </connections>
                                     </button>
                                     <button opaque="NO" tag="1" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="NAn-cR-MzW">
-                                        <rect key="frame" x="82" y="0.0" width="86" height="36"/>
+                                        <rect key="frame" x="77" y="0.0" width="86" height="36"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="20"/>
                                         <state key="normal" title="Real Time"/>
                                         <connections>
@@ -386,7 +386,7 @@
                                         </connections>
                                     </button>
                                     <button opaque="NO" tag="2" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="sqI-bV-bHg">
-                                        <rect key="frame" x="188" y="0.0" width="64" height="36"/>
+                                        <rect key="frame" x="178" y="0.0" width="64" height="36"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="20"/>
                                         <state key="normal" title="R-Peak"/>
                                         <connections>
@@ -394,7 +394,7 @@
                                         </connections>
                                     </button>
                                     <button opaque="NO" tag="3" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="dQ2-AK-zZt">
-                                        <rect key="frame" x="272" y="0.0" width="63" height="36"/>
+                                        <rect key="frame" x="257" y="0.0" width="63" height="36"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="20"/>
                                         <state key="normal" title="E-Peak"/>
                                         <connections>
@@ -402,11 +402,27 @@
                                         </connections>
                                     </button>
                                     <button opaque="NO" tag="4" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="nnH-HV-af6">
-                                        <rect key="frame" x="355" y="0.0" width="85" height="36"/>
+                                        <rect key="frame" x="335" y="0.0" width="85" height="36"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="20"/>
                                         <state key="normal" title="G-Sensor"/>
                                         <connections>
                                             <action selector="writeTestText:" destination="GH7-Cy-70i" eventType="touchUpInside" id="pGE-ia-HWA"/>
+                                        </connections>
+                                    </button>
+                                    <button opaque="NO" tag="5" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="rbn-VQ-NPx">
+                                        <rect key="frame" x="435" y="0.0" width="103" height="36"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="20"/>
+                                        <state key="normal" title="Get File List"/>
+                                        <connections>
+                                            <action selector="writeTestText:" destination="GH7-Cy-70i" eventType="touchUpInside" id="68Y-dW-Aag"/>
+                                        </connections>
+                                    </button>
+                                    <button opaque="NO" tag="6" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="BeZ-Wi-EYF">
+                                        <rect key="frame" x="553" y="0.0" width="119" height="36"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="20"/>
+                                        <state key="normal" title="Set RTC Time"/>
+                                        <connections>
+                                            <action selector="writeTestText:" destination="GH7-Cy-70i" eventType="touchUpInside" id="6my-LG-QDW"/>
                                         </connections>
                                     </button>
                                 </subviews>

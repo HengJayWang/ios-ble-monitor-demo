@@ -2,8 +2,8 @@
 //  CharacteristicViewController.swift
 //  ReadCharacteristic
 //
-//  Created by Adonis Gaitatzis on 11/22/16.
-//  Copyright © 2016 Adonis Gaitatzis. All rights reserved.
+//  Created by Created by Created by HengJay on 2017/12/04.
+//  Copyright © 2017 ITRI All rights reserved.
 //
 
 import UIKit
@@ -104,17 +104,19 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
         }
         writeCharacteristicButton.isEnabled = true
     }
-    var cmdData : [Bool] = [false, false, false, false, false]
+    var cmdData : [Bool] = [false, false, false, false, false, false, false]
     
     @IBAction func writeTestText(_ sender: UIButton) {
         
         let header = "49545249"
-        let cmdType : [String] = ["AB01","AB02","AB03","AB04","AB05"]
+        let cmdType : [String] = ["AB01", "AB02", "AB03", "AB04", "AB05", "AB06", "AB07"]
         let cmdDataValue = cmdData[sender.tag] ? "0002" : "0001"
         let comment = "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
             
         writeCharacteristicTextField.text = header + cmdType[sender.tag] + cmdDataValue + comment
         cmdData[sender.tag] = !cmdData[sender.tag]
+        cmdData[5] = false
+        cmdData[6] = false
     }
     // MARK: BlePeripheralDelegate
     
