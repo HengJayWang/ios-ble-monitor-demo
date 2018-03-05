@@ -94,29 +94,56 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
         
     }
 
+    let header : UInt32 = 0x49545249
+    let cmdType : [UInt16] = [0xAB01, 0xAB02, 0xAB03, 0xAB04, 0xAB05, 0xAB06, 0xAB07]
+    var cmdData : [Bool] = [false, false, false, false, false, false, false]
+    let comment = "FFFFFFFF"
+    var lastPressBtn : Int = 0
+    
     @IBAction func writeCharacteristic(_ sender: UIButton) {
         print("write button pressed")
         writeCharacteristicButton.isEnabled = false
-        if let stringValue = writeCharacteristicTextField.text {
-            print("stringValue is \(stringValue)")
-            blePeripheral.writeValue(value: stringValue, to: connectedCharacteristic)
-            writeCharacteristicTextField.text = ""
-        }
+       
+        let stringValue = generateCommandString()
+        print("stringValue is \(stringValue)")
+        blePeripheral.writeValue(value: stringValue, to: connectedCharacteristic)
+        writeCharacteristicTextField.text = ""
+        
         writeCharacteristicButton.isEnabled = true
     }
-    var cmdData : [Bool] = [false, false, false, false, false, false, false]
     
+    // Generate the command string by bigEndian.
+    func generateCommandString() -> String {
+        let cmdDataValue = cmdData[lastPressBtn] ? UInt16(0x0002) : UInt16(0x0001)
+        
+        let Header = String(header.bigEndian, radix: 16)
+        print("Header is \(Header) length is \(Header.count)")
+        
+        let CMDType = "0" + String(cmdType[lastPressBtn].bigEndian, radix: 16) // Add missing "0"
+        print("CMDType is \(CMDType) length is \(CMDType.count)")
+        
+        let CMDDataValue = "0" + String(cmdDataValue.bigEndian, radix: 16) // Add missing "0"
+        print("CMDDataValue is \(CMDDataValue) length is \(CMDDataValue.count)")
+        
+        let Comment = String(repeating:comment, count: 6)
+        print("Comment is \(Comment) length is \(Comment.count)")
+        
+        let commandStr = Header + CMDType + CMDDataValue + Comment
+        
+        return commandStr
+    }
+        
     @IBAction func writeTestText(_ sender: UIButton) {
         
-        let header = "49545249"
-        let cmdType : [String] = ["AB01", "AB02", "AB03", "AB04", "AB05", "AB06", "AB07"]
         let cmdDataValue = cmdData[sender.tag] ? "0002" : "0001"
-        let comment = "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
-            
-        writeCharacteristicTextField.text = header + cmdType[sender.tag] + cmdDataValue + comment
+        
+        writeCharacteristicTextField.text = String(header, radix: 16) +
+            String(cmdType[sender.tag], radix: 16) + cmdDataValue + String(repeating:comment, count: 6)
+        
         cmdData[sender.tag] = !cmdData[sender.tag]
         cmdData[5] = false
         cmdData[6] = false
+        lastPressBtn = sender.tag
     }
     // MARK: BlePeripheralDelegate
     
