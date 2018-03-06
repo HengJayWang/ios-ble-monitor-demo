@@ -48,7 +48,7 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
     var connectedCharacteristic: CBCharacteristic!
     
     // Received Data Buffer
-    var receivedData = [UInt8]()
+    //var receivedData = [UInt8]()
     
     // URL for save the received Data
     /*
@@ -114,21 +114,27 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
     
     // Generate the command string by bigEndian.
     func generateCommandString() -> String {
+        //print("cmdData is \(cmdData)")
         let cmdDataValue = cmdData[lastPressBtn] ? UInt16(0x0002) : UInt16(0x0001)
+        //print("lastPressBtn is \(lastPressBtn) cmdDataValue is \(cmdDataValue)")
         
         let Header = String(header.bigEndian, radix: 16)
-        print("Header is \(Header) length is \(Header.count)")
+        //print("Header is \(Header) length is \(Header.count)")
         
         let CMDType = "0" + String(cmdType[lastPressBtn].bigEndian, radix: 16) // Add missing "0"
-        print("CMDType is \(CMDType) length is \(CMDType.count)")
+        //print("CMDType is \(CMDType) length is \(CMDType.count)")
         
         let CMDDataValue = "0" + String(cmdDataValue.bigEndian, radix: 16) // Add missing "0"
-        print("CMDDataValue is \(CMDDataValue) length is \(CMDDataValue.count)")
+        //print("CMDDataValue is \(CMDDataValue) length is \(CMDDataValue.count)")
         
         let Comment = String(repeating:comment, count: 6)
-        print("Comment is \(Comment) length is \(Comment.count)")
+        //print("Comment is \(Comment) length is \(Comment.count)")
         
         let commandStr = Header + CMDType + CMDDataValue + Comment
+        
+        cmdData[lastPressBtn] = !cmdData[lastPressBtn]
+        cmdData[5] = false
+        cmdData[6] = false
         
         return commandStr
     }
@@ -140,9 +146,6 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
         writeCharacteristicTextField.text = String(header, radix: 16) +
             String(cmdType[sender.tag], radix: 16) + cmdDataValue + String(repeating:comment, count: 6)
         
-        cmdData[sender.tag] = !cmdData[sender.tag]
-        cmdData[5] = false
-        cmdData[6] = false
         lastPressBtn = sender.tag
     }
     // MARK: BlePeripheralDelegate
@@ -151,8 +154,6 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
      Characteristic was read.  Update UI
      */
     func blePeripheral(characteristicRead byteArray: [UInt8], characteristic: CBCharacteristic, blePeripheral: BlePeripheral) {
-    
-        receivedData += byteArray
         
         for i in 1...(byteArray.count/4) {
             // Update the signal value of channel 1
@@ -205,8 +206,6 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
         }
     }
     
-
-    
     
     // MARK: - Navigation
     
@@ -220,6 +219,5 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
             centralManager.cancelPeripheralConnection(connectedBlePeripheral.peripheral)
         }
     }
-    
 
 }
