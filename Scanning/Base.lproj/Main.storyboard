@@ -510,6 +510,9 @@
                         </constraints>
                     </view>
                     <connections>
+                        <outlet property="accelerXLabel" destination="1Re-0C-sM9" id="kc6-XM-DpL"/>
+                        <outlet property="accelerYLabel" destination="hdV-cg-b71" id="duX-8C-zbP"/>
+                        <outlet property="accelerZLabel" destination="yBf-yV-Nmm" id="CEt-G2-eyH"/>
                         <outlet property="advertizedNameLabel" destination="VNo-WI-zj0" id="dZN-8C-HWs"/>
                         <outlet property="characteristicUuidlabel" destination="gWf-Ng-eYS" id="e1r-8l-Dca"/>
                         <outlet property="identifierLabel" destination="57D-ph-cA1" id="v0D-Qr-ce9"/>

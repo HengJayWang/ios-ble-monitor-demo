@@ -32,6 +32,11 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
     @IBOutlet weak var writeCharacteristicButton: UIButton!
     @IBOutlet weak var writeCharacteristicTextField: UITextField!
     
+    @IBOutlet weak var accelerXLabel: UILabel!
+    
+    @IBOutlet weak var accelerYLabel: UILabel!
+    
+    @IBOutlet weak var accelerZLabel: UILabel!
     
     // MARK: Connected devices
     
@@ -155,19 +160,54 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
      */
     func blePeripheral(characteristicRead byteArray: [UInt8], characteristic: CBCharacteristic, blePeripheral: BlePeripheral) {
         
-        for i in 1...(byteArray.count/4) {
+        var mode : Int = 0
+        
+        let headerCheck : Bool = (byteArray[0] == 73) && (byteArray[1] == 82) &&
+            (byteArray[2] == 84) && (byteArray[3] == 73)
+        let dataLengthCheck : Bool = (byteArray[6] == byteArray.count)
+        
+        print("headerCheck: \(headerCheck), dataLengthCheck: \(dataLengthCheck)")
+        if  headerCheck && dataLengthCheck {
+            if byteArray[5] == 171 { mode = Int(byteArray[4]) }
+        }
+        
+        switch mode {
+        case 2:
+            let dataArray = [UInt8](byteArray[12...])
+            parseRealTimeMode(dataArray: dataArray)
+        default:
+            print("mode not find, mode value is \(mode)")
+        }
+        
+    }
+    
+    func parseRealTimeMode (dataArray: [UInt8]) {
+        print("dataArray length is \(dataArray.count)")
+        
+        func updateAccelerLabel(isFirst: Bool) {
+            let offset = isFirst ? 0 : 6
+            let accelerXValue = Int16(dataArray[1+offset]) << 8 + Int16(dataArray[0+offset])
+            accelerXLabel.text = String(accelerXValue)
+            let accelerYValue = Int16(dataArray[3+offset]) << 8 + Int16(dataArray[2+offset])
+            accelerYLabel.text = String(accelerYValue)
+            let accelerZValue = Int16(dataArray[5+offset]) << 8 + Int16(dataArray[4+offset])
+            accelerZLabel.text = String(accelerZValue)
+        }
+        updateAccelerLabel(isFirst: true)
+    
+        for i in 1...50 {
+            if i == 26 { updateAccelerLabel(isFirst: false) }
+            
             // Update the signal value of channel 1
-            let ch1Value = Int16(byteArray[i*4-3]) << 8 + Int16(byteArray[i*4-4])
+            let ch1Value = Int16(dataArray[11+i*2]) << 8 + Int16(dataArray[10+i*2])
             waveformArea.pushSignal1BySliding(newValue: CGFloat(ch1Value))
             signal1Value.text = String(ch1Value)
             // Update the signal value of channel 2
-            let ch2Value = Int16(byteArray[i*4-1]) << 8 + Int16(byteArray[i*4-2])
+            let ch2Value = Int16(dataArray[111+i*2]) << 8 + Int16(dataArray[110+i*2])
             waveformArea.pushSignal2BySliding(newValue: CGFloat(ch2Value))
             signal2Value.text = String(ch2Value)
         }
     }
-
-    
     
     // MARK: CBCentralManagerDelegate
     
