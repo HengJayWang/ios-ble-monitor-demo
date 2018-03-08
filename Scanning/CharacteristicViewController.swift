@@ -119,23 +119,26 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
     
     // Generate the command string by bigEndian.
     func generateCommandString() -> String {
-        //print("cmdData is \(cmdData)")
+        
+        var commandStr = ""
+        
         let cmdDataValue = cmdData[lastPressBtn] ? UInt16(0x0002) : UInt16(0x0001)
-        //print("lastPressBtn is \(lastPressBtn) cmdDataValue is \(cmdDataValue)")
         
         let Header = String(header.bigEndian, radix: 16)
-        //print("Header is \(Header) length is \(Header.count)")
         
         let CMDType = "0" + String(cmdType[lastPressBtn].bigEndian, radix: 16) // Add missing "0"
-        //print("CMDType is \(CMDType) length is \(CMDType.count)")
         
         let CMDDataValue = "0" + String(cmdDataValue.bigEndian, radix: 16) // Add missing "0"
-        //print("CMDDataValue is \(CMDDataValue) length is \(CMDDataValue.count)")
         
-        let Comment = String(repeating:comment, count: 6)
-        //print("Comment is \(Comment) length is \(Comment.count)")
-        
-        let commandStr = Header + CMDType + CMDDataValue + Comment
+        if lastPressBtn == 6 {
+            let Comment = String(repeating:comment, count: 5)
+            commandStr = Header + CMDType + CMDDataValue + getCurrentDate() + Comment
+        } else {
+            let Comment = String(repeating:comment, count: 6)
+            commandStr = Header + CMDType + CMDDataValue + Comment
+        }
+            
+        //let commandStr = Header + CMDType + CMDDataValue + Comment
         
         cmdData[lastPressBtn] = !cmdData[lastPressBtn]
         cmdData[5] = false
@@ -148,8 +151,14 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
         
         let cmdDataValue = cmdData[sender.tag] ? "0002" : "0001"
         
-        writeCharacteristicTextField.text = String(header, radix: 16) +
-            String(cmdType[sender.tag], radix: 16) + cmdDataValue + String(repeating:comment, count: 6)
+        if sender.tag == 6 {
+            writeCharacteristicTextField.text = String(header, radix: 16) +
+                String(cmdType[sender.tag], radix: 16) + cmdDataValue + getCurrentDate() + String(repeating:comment, count: 5)
+        } else {
+            writeCharacteristicTextField.text = String(header, radix: 16) +
+                String(cmdType[sender.tag], radix: 16) + cmdDataValue + String(repeating:comment, count: 6)
+        }
+        
         
         lastPressBtn = sender.tag
     }
@@ -209,6 +218,31 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
         }
     }
     
+    func getCurrentDate() -> String {
+        
+        let date = Date()
+        let calender = Calendar.current
+        let components = calender.dateComponents([.year,.month,.day,.hour,.minute,.second], from: date)
+        
+        let year = components.year
+        let month = components.month
+        let day = components.day
+        let hour = components.hour
+        let minute = components.minute
+        let second = components.second
+        
+        /*let today_string = String(year!) + "-" + String(month!) + "-" + String(day!) + " " + String(hour!)  + ":" + String(minute!) + ":" +  String(second!)*/
+        
+        let byte1 : UInt8 = UInt8(year!-2000) << 2 + UInt8(month!) >> 2
+        let byte2 : UInt8 = (UInt8(month!) % 4) << 6 + UInt8(day!) << 1 + UInt8(hour!) >> 4
+        let byte3 : UInt8 = (UInt8(hour!) % 16) << 4 + UInt8(minute!) >> 2
+        let byte4 : UInt8 = (UInt8(minute!) % 4) << 6 + UInt8(second!)
+        
+        let currentTime = String(byte1, radix:16) + String(byte2, radix:16) +
+            String(byte3, radix:16) + String(byte4, radix: 16)
+        
+        return currentTime
+    }
     // MARK: CBCentralManagerDelegate
     
     /**
