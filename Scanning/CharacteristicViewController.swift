@@ -237,8 +237,8 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
         let byte3 : UInt8 = (UInt8(hour!) % 16) << 4 + UInt8(minute!) >> 2
         let byte4 : UInt8 = (UInt8(minute!) % 4) << 6 + UInt8(second!)
         
-        let currentTime = String(format: "%02X", byte1) + String(format: "%02X", byte2) +
-            String(format: "%02X", byte3) + String(format: "%02X", byte4)
+        let currentTime = String(format: "%02X", byte4) + String(format: "%02X", byte3) +
+            String(format: "%02X", byte2) + String(format: "%02X", byte1)
         print(currentTime)
         return currentTime
     }
