@@ -114,7 +114,7 @@ class BlePeripheral: NSObject, CBPeripheralDelegate {
     func hexStrToByteArray( hexStr: String ) -> [UInt8] {
         var result = [UInt8](repeating: 0, count: hexStr.count/2 )
         for i in 1...(hexStr.count)/2 {
-            let str = hexStr[2*i-2]+hexStr[2*i-1]
+            let str = hexStr[2*i-2] + hexStr[2*i-1]
             result[i-1] = UInt8(str, radix:16)!
         }
         return result

@@ -124,11 +124,11 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
         
         let cmdDataValue = cmdData[lastPressBtn] ? UInt16(0x0002) : UInt16(0x0001)
         
-        let Header = String(header.bigEndian, radix: 16)
+        let Header = String(format: "%08X", header.bigEndian)
         
-        let CMDType = "0" + String(cmdType[lastPressBtn].bigEndian, radix: 16) // Add missing "0"
+        let CMDType = String(format: "%04X", cmdType[lastPressBtn].bigEndian)
         
-        let CMDDataValue = "0" + String(cmdDataValue.bigEndian, radix: 16) // Add missing "0"
+        let CMDDataValue = String(format: "%04X", cmdDataValue.bigEndian)
         
         if lastPressBtn == 6 {
             let Comment = String(repeating:comment, count: 5)
@@ -137,8 +137,6 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
             let Comment = String(repeating:comment, count: 6)
             commandStr = Header + CMDType + CMDDataValue + Comment
         }
-            
-        //let commandStr = Header + CMDType + CMDDataValue + Comment
         
         cmdData[lastPressBtn] = !cmdData[lastPressBtn]
         cmdData[5] = false
@@ -231,16 +229,17 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
         let minute = components.minute
         let second = components.second
         
-        /*let today_string = String(year!) + "-" + String(month!) + "-" + String(day!) + " " + String(hour!)  + ":" + String(minute!) + ":" +  String(second!)*/
+        let today_string = String(year!) + "-" + String(month!) + "-" + String(day!) + " " + String(hour!)  + ":" + String(minute!) + ":" +  String(second!)
+        print(today_string)
         
         let byte1 : UInt8 = UInt8(year!-2000) << 2 + UInt8(month!) >> 2
         let byte2 : UInt8 = (UInt8(month!) % 4) << 6 + UInt8(day!) << 1 + UInt8(hour!) >> 4
         let byte3 : UInt8 = (UInt8(hour!) % 16) << 4 + UInt8(minute!) >> 2
         let byte4 : UInt8 = (UInt8(minute!) % 4) << 6 + UInt8(second!)
         
-        let currentTime = String(byte1, radix:16) + String(byte2, radix:16) +
-            String(byte3, radix:16) + String(byte4, radix: 16)
-        
+        let currentTime = String(format: "%02X", byte1) + String(format: "%02X", byte2) +
+            String(format: "%02X", byte3) + String(format: "%02X", byte4)
+        print(currentTime)
         return currentTime
     }
     // MARK: CBCentralManagerDelegate
