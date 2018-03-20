@@ -171,19 +171,45 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
         
         let headerCheck : Bool = (byteArray[0] == 73) && (byteArray[1] == 82) &&
             (byteArray[2] == 84) && (byteArray[3] == 73)
-        let dataLengthCheck : Bool = (byteArray[6] == byteArray.count)
         
-        print("headerCheck: \(headerCheck), dataLengthCheck: \(dataLengthCheck)")
-        if  headerCheck && dataLengthCheck {
-            if byteArray[5] == 171 { mode = Int(byteArray[4]) }
+        print("headerCheck: \(headerCheck) " )
+        if  headerCheck && byteArray[5] == 171 {
+            mode = Int(byteArray[4])
         }
         
         switch mode {
         case 2:
             let dataArray = [UInt8](byteArray[12...])
             parseRealTimeMode(dataArray: dataArray)
+        case 6:
+            print("Parse the date!")
+            let dataArray = [UInt8](byteArray[12...])
+            let dataLength = Int(byteArray[7]) << 8 + Int(byteArray[6])
+            parseGetFileListDate(dataArray: dataArray, dataLenth: dataLength)
         default:
             print("mode not find, mode value is \(mode)")
+        }
+        
+    }
+    
+    func parseGetFileListDate (dataArray: [UInt8], dataLenth: Int) {
+        print("dataArray is \(dataArray)")
+        print("The array length is \(dataArray.count)")
+        print("The data length is \(dataLenth)")
+        let dataInRange = dataArray.count > dataLenth
+        print("dataInRange : \(dataInRange)")
+        
+        if dataLenth >= 8 {
+            for i in 1...(dataLenth/8) {
+                let year : UInt8 = dataArray[i*8-5] >> 2
+                let month : UInt8 = dataArray[i*8-5] % 4 + dataArray[i*8-6] >> 6
+                let day : UInt8 = (dataArray[i*8-6] >> 1) % 32
+                let hour : UInt8 = (dataArray[i*8-6] % 2) << 4 + dataArray[i*8-7] >> 4
+                let min : UInt8 = (dataArray[i*8-7] % 16) << 2 + dataArray[i*8-8] >> 6
+                let sec : UInt8 = dataArray[i*8-8] % 64
+                
+                print("The date(\(i)) : \(Int(year)+2000)-\(month)-\(day) \(hour):\(min):\(sec)")
+            }
         }
         
     }
