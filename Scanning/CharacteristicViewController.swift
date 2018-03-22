@@ -38,6 +38,14 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
     
     @IBOutlet weak var accelerZLabel: UILabel!
     
+    @IBOutlet weak var consoleTextView: UITextView!
+    
+    @IBOutlet weak var fileIndexTextFiled: UITextField!
+    
+    @IBOutlet weak var startTimeTextField: UITextField!
+    
+    @IBOutlet weak var durationTimeTextField: UITextField!
+    
     // MARK: Connected devices
     
     // Central Bluetooth Radio
@@ -96,9 +104,11 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
             writeCharacteristicTextField.isHidden = true
             writeCharacteristicButton.isHidden = true
         }
-        
+        startTimeTextField.isEnabled = false
+        durationTimeTextField.isEnabled = false
     }
 
+    var fileDurationTime : [UInt32] = [UInt32](repeating: 0, count: 8)
     let header : UInt32 = 0x49545249
     let cmdType : [UInt16] = [0xAB01, 0xAB02, 0xAB03, 0xAB04, 0xAB05, 0xAB06, 0xAB07]
     var cmdData : [Bool] = [false, false, false, false, false, false, false]
@@ -106,14 +116,12 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
     var lastPressBtn : Int = 0
     
     @IBAction func writeCharacteristic(_ sender: UIButton) {
-        print("write button pressed")
+        printToConsole("write button pressed")
         writeCharacteristicButton.isEnabled = false
        
         let stringValue = generateCommandString()
-        print("stringValue is \(stringValue)")
         blePeripheral.writeValue(value: stringValue, to: connectedCharacteristic)
         writeCharacteristicTextField.text = ""
-        
         writeCharacteristicButton.isEnabled = true
     }
     
@@ -130,7 +138,10 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
         
         let CMDDataValue = String(format: "%04X", cmdDataValue.bigEndian)
         
-        if lastPressBtn == 6 {
+        if (lastPressBtn == 2) || (lastPressBtn == 3) || (lastPressBtn == 4) {
+            let Comment = String(repeating:comment, count: 3)
+            commandStr = Header + CMDType + CMDDataValue + getFileCommandString() + Comment
+        } else if lastPressBtn == 6 {
             let Comment = String(repeating:comment, count: 5)
             commandStr = Header + CMDType + CMDDataValue + getCurrentDate() + Comment
         } else {
@@ -141,7 +152,7 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
         cmdData[lastPressBtn] = !cmdData[lastPressBtn]
         cmdData[5] = false
         cmdData[6] = false
-        
+        printToConsole("The string will be write to peripheral: \(commandStr)")
         return commandStr
     }
         
@@ -149,7 +160,21 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
         
         let cmdDataValue = cmdData[sender.tag] ? "0002" : "0001"
         
-        if sender.tag == 6 {
+        if (sender.tag == 2) || (sender.tag == 3) || (sender.tag == 4) {
+            let fileIndex = Int(fileIndexTextFiled.text!) ?? 0
+            let startTime = Int(startTimeTextField.text!) ?? 0
+            let durationTime = Int(durationTimeTextField.text!) ?? 0
+            
+            if (fileIndex > 0) && (fileIndex <= 8) && (startTime > 0) && (durationTime > 0)
+                && (startTime + durationTime <= fileDurationTime[fileIndex-1]) {
+                writeCharacteristicTextField.text = String(header, radix: 16) +
+                    String(cmdType[sender.tag], radix: 16) + cmdDataValue +
+                    getFileCommandString() + String(repeating:comment, count: 3)
+                printToConsole("The input format is valid !!")
+            } else {
+                printToConsole("fileIndex or startTime or duratime is invalid !!")
+            }
+        } else if sender.tag == 6 {
             writeCharacteristicTextField.text = String(header, radix: 16) +
                 String(cmdType[sender.tag], radix: 16) + cmdDataValue + getCurrentDate() + String(repeating:comment, count: 5)
         } else {
@@ -171,8 +196,8 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
         
         let headerCheck : Bool = (byteArray[0] == 73) && (byteArray[1] == 82) &&
             (byteArray[2] == 84) && (byteArray[3] == 73)
-        
-        print("headerCheck: \(headerCheck) " )
+        printToConsole("Characteristic is received !   byteArray length is \(byteArray.count)")
+        printToConsole("headerCheck is \(headerCheck) ")
         if  headerCheck && byteArray[5] == 171 {
             mode = Int(byteArray[4])
         }
@@ -180,24 +205,29 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
         switch mode {
         case 2:
             let dataArray = [UInt8](byteArray[12...])
-            parseRealTimeMode(dataArray: dataArray)
+            if dataArray.count == 212 { parseRealTimeMode(dataArray: dataArray) }
         case 6:
-            print("Parse the date!")
             let dataArray = [UInt8](byteArray[12...])
             let dataLength = Int(byteArray[7]) << 8 + Int(byteArray[6])
             parseGetFileListDate(dataArray: dataArray, dataLenth: dataLength)
         default:
-            print("mode not find, mode value is \(mode)")
+            printToConsole("Parse mode not find, mode value is \(mode)")
         }
         
     }
     
     func parseGetFileListDate (dataArray: [UInt8], dataLenth: Int) {
-        print("dataArray is \(dataArray)")
-        print("The array length is \(dataArray.count)")
-        print("The data length is \(dataLenth)")
+       
         let dataInRange = dataArray.count > dataLenth
-        print("dataInRange : \(dataInRange)")
+
+        let message = """
+        Parse GetFileList Mode Date:
+        The dataArray is \(dataArray)
+        The array length is \(dataArray.count)
+        The data length is \(dataLenth)
+        dataInRange is \(dataInRange)
+        """
+        printToConsole(message)
         
         if dataLenth >= 8 {
             for i in 1...(dataLenth/8) {
@@ -208,14 +238,24 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
                 let min : UInt8 = (dataArray[i*8-7] % 16) << 2 + dataArray[i*8-8] >> 6
                 let sec : UInt8 = dataArray[i*8-8] % 64
                 
-                print("The date(\(i)) : \(Int(year)+2000)-\(month)-\(day) \(hour):\(min):\(sec)")
+                let durationTime : UInt32 = UInt32(dataArray[i*8-1]) << 24 +
+                                            UInt32(dataArray[i*8-2]) << 16 +
+                                            UInt32(dataArray[i*8-3]) << 8 +
+                                            UInt32(dataArray[i*8-4])
+                fileDurationTime[i-1] = durationTime
+                let message = "The date of \(i) file : \(Int(year)+2000)-\(month)-\(day) \(hour):\(min):\(sec)  Duration Time: \(durationTime)"
+                printToConsole(message)
             }
         }
-        
+        startTimeTextField.isEnabled = true
+        durationTimeTextField.isEnabled = true
+        printToConsole("duration times is saved in array: \(fileDurationTime)")
     }
     
     func parseRealTimeMode (dataArray: [UInt8]) {
-        print("dataArray length is \(dataArray.count)")
+
+        let message = "Parse Real-Time Mode Data: dataArray length is \(dataArray.count)"
+        printToConsole(message)
         
         func updateAccelerLabel(isFirst: Bool) {
             let offset = isFirst ? 0 : 6
@@ -240,6 +280,23 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
             waveformArea.pushSignal2BySliding(newValue: CGFloat(ch2Value))
             signal2Value.text = String(ch2Value)
         }
+    }
+    
+    func printToConsole (_ message: String) {
+        print(message)
+        consoleTextView.insertText(message + "\n")
+        let stringLength = consoleTextView.text.count
+        consoleTextView.scrollRangeToVisible(NSMakeRange(stringLength-1,0))
+    }
+    
+    func getFileCommandString() -> String {
+        let fileIndex = Int(fileIndexTextFiled.text!) ?? 0
+        let startTime = Int(startTimeTextField.text!) ?? 0
+        let durationTime = Int(durationTimeTextField.text!) ?? 0
+        
+        return String(format: "%08X", fileIndex.bigEndian) +
+               String(format: "%08X", startTime.bigEndian) +
+               String(format: "%08X", durationTime.bigEndian)
     }
     
     func getCurrentDate() -> String {
