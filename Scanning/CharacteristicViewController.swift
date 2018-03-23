@@ -161,12 +161,12 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
         let cmdDataValue = cmdData[sender.tag] ? "0002" : "0001"
         
         if (sender.tag == 2) || (sender.tag == 3) || (sender.tag == 4) {
-            let fileIndex = Int(fileIndexTextFiled.text!) ?? 0
-            let startTime = Int(startTimeTextField.text!) ?? 0
-            let durationTime = Int(durationTimeTextField.text!) ?? 0
+            let fileIndex = UInt32(fileIndexTextFiled.text!) ?? 0
+            let startTime = UInt32(startTimeTextField.text!) ?? 0
+            let durationTime = UInt32(durationTimeTextField.text!) ?? 0
             
             if (fileIndex > 0) && (fileIndex <= 8) && (startTime > 0) && (durationTime > 0)
-                && (startTime + durationTime <= fileDurationTime[fileIndex-1]) {
+                && (startTime + durationTime <= fileDurationTime[Int(fileIndex)-1]) {
                 writeCharacteristicTextField.text = String(header, radix: 16) +
                     String(cmdType[sender.tag], radix: 16) + cmdDataValue +
                     getFileCommandString() + String(repeating:comment, count: 3)
@@ -290,13 +290,15 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
     }
     
     func getFileCommandString() -> String {
-        let fileIndex = Int(fileIndexTextFiled.text!) ?? 0
-        let startTime = Int(startTimeTextField.text!) ?? 0
-        let durationTime = Int(durationTimeTextField.text!) ?? 0
-        
-        return String(format: "%08X", fileIndex.bigEndian) +
-               String(format: "%08X", startTime.bigEndian) +
-               String(format: "%08X", durationTime.bigEndian)
+        let fileIndex = UInt32(fileIndexTextFiled.text!) ?? 0
+        let startTime = UInt32(startTimeTextField.text!) ?? 0
+        let durationTime = UInt32(durationTimeTextField.text!) ?? 0
+        printToConsole("getFileCommandString : fileIndex: \(fileIndex), startIndex: \(startTime), durationTime: \(durationTime)")
+        let commandString = String(format: "%08X", fileIndex.bigEndian) +
+                            String(format: "%08X", startTime.bigEndian) +
+                            String(format: "%08X", durationTime.bigEndian)
+        printToConsole("commandString is \(commandString)")
+        return commandString
     }
     
     func getCurrentDate() -> String {
