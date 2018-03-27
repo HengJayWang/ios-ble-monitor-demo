@@ -165,7 +165,7 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
             let startTime = UInt32(startTimeTextField.text!) ?? 0
             let durationTime = UInt32(durationTimeTextField.text!) ?? 0
             
-            if (fileIndex > 0) && (fileIndex <= 8) && (startTime > 0) && (durationTime > 0)
+            if (fileIndex >= 1) && (fileIndex <= 8) && (startTime >= 0) && (durationTime >= 0)
                 && (startTime + durationTime <= fileDurationTime[Int(fileIndex)-1]) {
                 writeCharacteristicTextField.text = String(header, radix: 16) +
                     String(cmdType[sender.tag], radix: 16) + cmdDataValue +
@@ -249,6 +249,7 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
         }
         startTimeTextField.isEnabled = true
         durationTimeTextField.isEnabled = true
+        durationTimeTextField.text = String(fileDurationTime[0])
         printToConsole("duration times is saved in array: \(fileDurationTime)")
     }
     
