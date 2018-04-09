@@ -196,6 +196,10 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
             (byteArray[2] == 84) && (byteArray[3] == 73)
         printToConsole("Characteristic is received !   byteArray length is \(byteArray.count)")
         printToConsole("headerCheck is \(headerCheck) ")
+        
+        if lastPressBtn == 1 {
+            printToConsole("signal Max is \(waveformArea.signal1Max), min is \(waveformArea.signal1Min)")
+        }
         if  headerCheck && byteArray[5] == 171 {
             mode = Int(byteArray[4])
         }
