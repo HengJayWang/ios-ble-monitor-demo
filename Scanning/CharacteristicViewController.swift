@@ -33,17 +33,13 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
     @IBOutlet weak var writeCharacteristicTextField: UITextField!
     
     @IBOutlet weak var accelerXLabel: UILabel!
-    
     @IBOutlet weak var accelerYLabel: UILabel!
-    
     @IBOutlet weak var accelerZLabel: UILabel!
     
     @IBOutlet weak var consoleTextView: UITextView!
     
     @IBOutlet weak var fileIndexTextFiled: UITextField!
-    
     @IBOutlet weak var startTimeTextField: UITextField!
-    
     @IBOutlet weak var durationTimeTextField: UITextField!
     
     // MARK: Connected devices
@@ -108,7 +104,7 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
         durationTimeTextField.isEnabled = false
     }
 
-    var fileDurationTime : [UInt32] = [UInt32](repeating: 0, count: 8)
+    var fileDurationTime : [UInt32] = [UInt32](repeating: 0, count: 32)
     let header : UInt32 = 0x49545249
     let cmdType : [UInt16] = [0xAB01, 0xAB02, 0xAB03, 0xAB04, 0xAB05, 0xAB06, 0xAB07]
     var cmdData : [Bool] = [false, false, false, false, false, false, false]
@@ -165,14 +161,17 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
             let startTime = UInt32(startTimeTextField.text!) ?? 0
             let durationTime = UInt32(durationTimeTextField.text!) ?? 0
             
-            if (fileIndex >= 1) && (fileIndex <= 8) && (startTime >= 0) && (durationTime >= 0)
-                && (startTime + durationTime <= fileDurationTime[Int(fileIndex)-1]) {
+            if !((fileIndex >= 1) && (fileIndex <= 32)) {
+                printToConsole("fileIndex error !! Need to follow the condition: >= 1 && <= 32")
+            } else if !((startTime >= 0) && (durationTime >= 0)) {
+                printToConsole("startTime or durationTime error !! Need to follow the condition: >= 0")
+            } else if !(startTime + durationTime <= fileDurationTime[Int(fileIndex)-1]) {
+                printToConsole("Exceed maxmium file time error !! The startTime: \(startTime) + durationTime: \(durationTime) need to <= maxmium of \(fileIndex) file: \(fileDurationTime[Int(fileIndex)-1]) ")
+            } else {
                 writeCharacteristicTextField.text = String(header, radix: 16) +
                     String(cmdType[sender.tag], radix: 16) + cmdDataValue +
                     getFileCommandString() + String(repeating:comment, count: 3)
-                printToConsole("The input format is valid !!")
-            } else {
-                printToConsole("fileIndex or startTime or duratime is invalid !!")
+                printToConsole("The input format is valid !! write command text succeed !!")
             }
         } else if sender.tag == 6 {
             writeCharacteristicTextField.text = String(header, radix: 16) +
@@ -181,7 +180,6 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
             writeCharacteristicTextField.text = String(header, radix: 16) +
                 String(cmdType[sender.tag], radix: 16) + cmdDataValue + String(repeating:comment, count: 6)
         }
-        
         
         lastPressBtn = sender.tag
     }
@@ -209,41 +207,51 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
         case 6:
             let dataArray = [UInt8](byteArray[12...])
             let dataLength = Int(byteArray[7]) << 8 + Int(byteArray[6])
-            parseGetFileListDate(dataArray: dataArray, dataLenth: dataLength)
+            parseGetFileListDate(dataArray: dataArray, dataLength: dataLength)
         default:
             printToConsole("Parse mode not find, mode value is \(mode)")
         }
         
     }
     
-    func parseGetFileListDate (dataArray: [UInt8], dataLenth: Int) {
+    func parseGetFileListDate (dataArray: [UInt8], dataLength: Int) {
        
-        let dataInRange = dataArray.count > dataLenth
+        let dataInRange = dataArray.count > dataLength
 
         let message = """
         Parse GetFileList Mode Date:
         The dataArray is \(dataArray)
         The array length is \(dataArray.count)
-        The data length is \(dataLenth)
+        The data length is \(dataLength)
         dataInRange is \(dataInRange)
         """
         printToConsole(message)
         
-        if dataLenth >= 8 {
-            for i in 1...(dataLenth/8) {
-                let year : UInt8 = dataArray[i*8-5] >> 2
-                let month : UInt8 = dataArray[i*8-5] % 4 + dataArray[i*8-6] >> 6
-                let day : UInt8 = (dataArray[i*8-6] >> 1) % 32
-                let hour : UInt8 = (dataArray[i*8-6] % 2) << 4 + dataArray[i*8-7] >> 4
-                let min : UInt8 = (dataArray[i*8-7] % 16) << 2 + dataArray[i*8-8] >> 6
-                let sec : UInt8 = dataArray[i*8-8] % 64
+        if dataLength >= 12 {
+            for i in 1...(dataLength/12) {
+                let year : UInt8 = dataArray[i*12-5] >> 2
+                printToConsole("The year byte is : \(dataArray[i*12-5])")
+                printToConsole("in binary : " + String(dataArray[i*12-5], radix: 2))
+                let month : UInt8 = (dataArray[i*12-5] % 4) << 2 + dataArray[i*12-6] >> 6
+                let day : UInt8 = (dataArray[i*12-6] >> 1) % 32
+                let hour : UInt8 = (dataArray[i*12-6] % 2) << 4 + dataArray[i*12-7] >> 4
+                let min : UInt8 = (dataArray[i*12-7] % 16) << 2 + dataArray[i*12-8] >> 6
+                let sec : UInt8 = dataArray[i*12-8] % 64
                 
-                let durationTime : UInt32 = UInt32(dataArray[i*8-1]) << 24 +
-                                            UInt32(dataArray[i*8-2]) << 16 +
-                                            UInt32(dataArray[i*8-3]) << 8 +
-                                            UInt32(dataArray[i*8-4])
-                fileDurationTime[i-1] = durationTime
-                let message = "The date of \(i) file : \(Int(year)+2000)-\(month)-\(day) \(hour):\(min):\(sec)  Duration Time: \(durationTime)"
+                let durationTime : UInt32 = UInt32(dataArray[i*12-1]) << 24 +
+                                            UInt32(dataArray[i*12-2]) << 16 +
+                                            UInt32(dataArray[i*12-3]) << 8 +
+                                            UInt32(dataArray[i*12-4])
+                
+                let fileIndex : UInt32 = UInt32(dataArray[i*12-9]) << 24 +
+                                         UInt32(dataArray[i*12-10]) << 16 +
+                                         UInt32(dataArray[i*12-11]) << 8 +
+                                         UInt32(dataArray[i*12-12])
+                
+                if (fileIndex >= 1) && (fileIndex <= 32) {
+                    fileDurationTime[Int(fileIndex)-1] = durationTime
+                }
+                let message = "The date of \(fileIndex) file : \(Int(year)+2000)-\(month)-\(day) \(hour):\(min):\(sec)  Duration Time: \(durationTime)"
                 printToConsole(message)
             }
         }
@@ -315,8 +323,9 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
         let minute = components.minute
         let second = components.second
         
-        let today_string = String(year!) + "-" + String(month!) + "-" + String(day!) + " " + String(hour!)  + ":" + String(minute!) + ":" +  String(second!)
-        print(today_string)
+        let today_string = String(year!) + "-" + String(month!) + "-" + String(day!) + " " + String(hour!) + ":" + String(minute!) + ":"
+            + String(second!)
+        printToConsole(today_string)
         
         let byte1 : UInt8 = UInt8(year!-2000) << 2 + UInt8(month!) >> 2
         let byte2 : UInt8 = (UInt8(month!) % 4) << 6 + UInt8(day!) << 1 + UInt8(hour!) >> 4
@@ -325,7 +334,7 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
         
         let currentTime = String(format: "%02X", byte4) + String(format: "%02X", byte3) +
             String(format: "%02X", byte2) + String(format: "%02X", byte1)
-        print(currentTime)
+        printToConsole("currentTime in 4 bytes formatis : " + currentTime)
         return currentTime
     }
     // MARK: CBCentralManagerDelegate
