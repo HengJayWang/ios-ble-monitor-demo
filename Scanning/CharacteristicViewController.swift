@@ -310,7 +310,6 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
             printToConsole("The \(i)th of R-Peak value is: \(rPeakValue)")
         }
         printToConsole("\(dataArray.count/4) R-Peak value in total.")
-        
     }
     
     func printToConsole (_ message: String) {
