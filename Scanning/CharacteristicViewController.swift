@@ -166,7 +166,7 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
             } else if !((startTime >= 0) && (durationTime >= 0)) {
                 printToConsole("startTime or durationTime error !! Need to follow the condition: >= 0")
             } else if !(startTime + durationTime <= fileDurationTime[Int(fileIndex)-1]) {
-                printToConsole("Exceed maxmium file time error !! The startTime: \(startTime) + durationTime: \(durationTime) need to <= maxmium of \(fileIndex) file: \(fileDurationTime[Int(fileIndex)-1]) ")
+                printToConsole("Exceed maximum file time error !! The startTime: \(startTime) + durationTime: \(durationTime) need to <= maximum of \(fileIndex) file: \(fileDurationTime[Int(fileIndex)-1]) ")
             } else {
                 writeCharacteristicTextField.text = String(header, radix: 16) +
                     String(cmdType[sender.tag], radix: 16) + cmdDataValue +
@@ -226,7 +226,7 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
         let dataInRange = dataArray.count > dataLength
 
         let message = """
-        Parse GetFileList Mode Date:
+        Parse GetFileList Mode :
         The dataArray is \(dataArray)
         The array length is \(dataArray.count)
         The data length is \(dataLength)
@@ -237,8 +237,8 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
         if dataLength >= 12 {
             for i in 1...(dataLength/12) {
                 let year : UInt8 = dataArray[i*12-5] >> 2
-                printToConsole("The year byte is : \(dataArray[i*12-5])")
-                printToConsole("in binary : " + String(dataArray[i*12-5], radix: 2))
+                //printToConsole("The year byte is : \(dataArray[i*12-5])")
+                //printToConsole("in binary : " + String(dataArray[i*12-5], radix: 2))
                 let month : UInt8 = (dataArray[i*12-5] % 4) << 2 + dataArray[i*12-6] >> 6
                 let day : UInt8 = (dataArray[i*12-6] >> 1) % 32
                 let hour : UInt8 = (dataArray[i*12-6] % 2) << 4 + dataArray[i*12-7] >> 4
@@ -301,7 +301,7 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
     func parseRPeakMode (dataArray: [UInt8]) {
         let message = "Parse R-Peak Mode Data: dataArray length is \(dataArray.count)"
         printToConsole(message)
-        
+        /*
         for i in 1...(dataArray.count/4) {
             let rPeakValue : UInt32 = UInt32(dataArray[i*4-1]) << 24 +
                                       UInt32(dataArray[i*4-2]) << 16 +
@@ -310,6 +310,7 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
             printToConsole("The \(i)th of R-Peak value is: \(rPeakValue)")
         }
         printToConsole("\(dataArray.count/4) R-Peak value in total.")
+        */
     }
     
     func printToConsole (_ message: String) {
