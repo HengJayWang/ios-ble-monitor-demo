@@ -9,17 +9,11 @@
 import UIKit
 import CoreBluetooth
 import Foundation
-/*
-extension FileManager {
-    static var documentDirectoryURL: URL {
-        return FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
-    }
-}*/
 
 /**
  This view talks to a Characteristic
  */
-class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, BlePeripheralDelegate {
+class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, BlePeripheralDelegate, NotifyCustomDelegate, NotifyFotaDelegate {
     
     // MARK: UI elements
     @IBOutlet weak var advertizedNameLabel: UILabel!
@@ -30,17 +24,18 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
     @IBOutlet weak var signal1Value: UILabel!
     @IBOutlet weak var signal2Value: UILabel!
     @IBOutlet weak var writeCharacteristicButton: UIButton!
+    @IBOutlet weak var writeFOTAButton: UIButton!
     @IBOutlet weak var writeCharacteristicTextField: UITextField!
     
     @IBOutlet weak var accelerXLabel: UILabel!
     @IBOutlet weak var accelerYLabel: UILabel!
     @IBOutlet weak var accelerZLabel: UILabel!
     
-    @IBOutlet weak var consoleTextView: UITextView!
-    
     @IBOutlet weak var fileIndexTextFiled: UITextField!
     @IBOutlet weak var startTimeTextField: UITextField!
     @IBOutlet weak var durationTimeTextField: UITextField!
+    
+    @IBOutlet weak var consoleTextView: UITextView!
     
     // MARK: Connected devices
     
@@ -56,40 +51,45 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
     // Connected Characteristic
     var connectedCharacteristic: CBCharacteristic!
     
-    // Received Data Buffer
-    //var receivedData = [UInt8]()
+    // DOGP Characteristic for FOTA
+    var dogpReadCharacteristic: CBCharacteristic!
+    var dogpWriteCharacteristic: CBCharacteristic!
+    var dogpCharFind: Bool = false
     
-    // URL for save the received Data
-    /*
-    let receivedDataURL = URL(
-        fileURLWithPath: "receivedData",
-        relativeTo: FileManager.documentDirectoryURL
-    )*/
+    // BtNotify Library
+    var btNotify: BtNotify!
+ 
+    // Fota Type
+    var FotaType: Int32 = 5 // Full bin
     
     /**
      UIView loaded
      */
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        print("Will connect to device \(blePeripheral.peripheral.identifier.uuidString)")
-        print("Will connect to characteristic \(connectedCharacteristic.uuid.uuidString)")
+        loadUI()
+        printToConsole("Will connect to device \(blePeripheral.peripheral.identifier.uuidString)")
+        printToConsole("Will connect to characteristic \(connectedCharacteristic.uuid.uuidString)")
         
         centralManager.delegate = self
         blePeripheral.delegate = self
         
-        loadUI()
-        
+        btNotify = (BtNotify.sharedInstance() as! BtNotify)
+        FotaSetting()
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        btNotify.register(self as NotifyCustomDelegate)
+        btNotify.register(self as NotifyFotaDelegate)
+        FotaSetting()
     }
     
     @IBAction func notifyCharacteristic(_ sender: UISwitch) {
-        print("notify the characteristic is \(sender.isOn)")
+        printToConsole("notify the characteristic is \(sender.isOn)")
         blePeripheral.peripheral.setNotifyValue(sender.isOn, for: connectedCharacteristic)
-        
     }
-    /**
-     Load UI elements
-     */
+    /* Load UI elements */
     func loadUI() {
         advertizedNameLabel.text = blePeripheral.advertisedName
         identifierLabel.text = blePeripheral.peripheral.identifier.uuidString
@@ -97,11 +97,155 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
         
         // characteristic is not writeable
         if !BlePeripheral.isCharacteristic(isWriteable: connectedCharacteristic) {
-            writeCharacteristicTextField.isHidden = true
-            writeCharacteristicButton.isHidden = true
+            writeCharacteristicTextField.isEnabled = false
+            writeCharacteristicButton.isEnabled = false
         }
+        writeFOTAButton.isEnabled = false
         startTimeTextField.isEnabled = false
         durationTimeTextField.isEnabled = false
+        blePeripheral.peripheral.setNotifyValue(true, for: connectedCharacteristic)
+    }
+    
+    func FotaSetting() {
+        if let dogpRead = dogpReadCharacteristic, let dogpWrite = dogpWriteCharacteristic {
+            printToConsole("dogpReadCharacteristic find ! uuid is \(dogpRead.uuid.uuidString)")
+            printToConsole("dogpWriteCharacteristic find ! uuid is \(dogpWrite.uuid.uuidString)")
+            dogpCharFind = true
+            printToConsole("dogpCharFind is \(dogpCharFind)")
+        }
+        if dogpCharFind {
+            printToConsole("The FOTA characteristic is found (\(dogpReadCharacteristic.uuid.uuidString),\(dogpWriteCharacteristic.uuid.uuidString)), FOTA setting is running.")
+        } else {
+            printToConsole("The FOTA characteristic not found, FOTA setting is quit !")
+            return
+        }
+        
+        let bundlePath = Bundle.main.url(forResource: "image", withExtension: "bin")
+        printToConsole("bundlePath of image.bin is " + (bundlePath?.path)!)
+        
+       
+        if dogpCharFind {
+            printToConsole("btNotify.setGattParameters run ! (Start)")
+            btNotify.setGattParameters(blePeripheral.peripheral,
+                                       write: dogpWriteCharacteristic,
+                                       read: dogpReadCharacteristic)
+            printToConsole("btNotify.setGattParameters run ! (End)")
+        }
+        
+        btNotify.updateConnectionState(Int32(CBPeripheralState.connected.rawValue))
+        
+        writeFOTAButton.isEnabled = dogpCharFind
+    }
+    
+    @IBAction func writeFOTA(_ sender: UIButton) {
+        let bundlePath = Bundle.main.url(forResource: "image", withExtension: "bin")
+        printToConsole("bundlePath of image.bin is " + (bundlePath?.path)!)
+        
+        let isReady = (BtNotify.sharedInstance() as! BtNotify).isReadyToSend()
+        printToConsole("The btNotify.isReadyToSend() return value : \(isReady)")
+        
+        let returnValue = (BtNotify.sharedInstance() as! BtNotify).sendFotaTypeGetCmd()
+        printToConsole("The btNotify.sendFotaTypeGetCmd() return value : \(returnValue)")
+        
+        checkReturnValue(returnValue)
+        
+        do {
+            let data = try Data(contentsOf: bundlePath!)
+            let byteArray = [UInt8](data)
+            printToConsole("The content size of image.bin is (Data) : \(data.count)")
+            printToConsole("The content size of image.bin is (byteArray): \(byteArray.count)")
+            let returnValue = (BtNotify.sharedInstance() as! BtNotify).sendFotaData(FotaType, firmwareData: data)
+            printToConsole("btNotify.sendFotaData returnValue is \(returnValue)")
+            checkReturnValue(returnValue)
+        } catch {
+            printToConsole("Parse image.bin string Error !")
+        }
+    }
+    
+    func checkReturnValue(_ returnValue: Int32) {
+        var message : String
+        switch returnValue {
+        case ERROR_CODE_OK:
+            message = "ERROR_CODE_OK"
+        case ERROR_CODE_NOT_INITED:
+            message = "ERROR_CODE_NOT_INITED"
+        case ERROR_CODE_NOT_STARTED:
+            message = "ERROR_CODE_NOT_STARTED"
+        case ERROR_CODE_NOT_HANDSHAKE_DONE:
+            message = "ERROR_CODE_NOT_HANDSHAKE_DONE"
+        default:
+            message = "not found"
+        }
+        printToConsole("returnValue \(returnValue) means \(message) !")
+    }
+    
+    /* Implement function for NotifyCustomDelegete */
+    func onDataArrival(_ receiver: String!, arrivalData data: Data!) {
+        printToConsole("onDataArrival: the receiver : \(receiver), arrivalData length : \(data.count))")
+    }
+    
+    func onReady(toSend ready: Bool) {
+        printToConsole("onReady: the ready is \(ready)")
+    }
+    
+    func onProgress(_ sender: String!, newProgress progress: Float) {
+        printToConsole("onProgress: the sender is \(sender), progress: \(progress)")
+    }
+    
+    /* Implement function for NotifyFotaDelegete */
+    func onFotaTypeReceived(_ fotaType: Int32) {
+        printToConsole("onFotaTypeReceived: the fotaType is \(fotaType)")
+        FotaType = fotaType
+        var message : String
+        switch fotaType {
+        case REDBEND_FOTA_UPDATE:
+            message = "REDBEND_FOTA_UPDATE"
+        case SEPARATE_BIN_FOTA_UPDATE:
+            message = "SEPARATE_BIN_FOTA_UPDATE"
+        case ROCK_FOTA_UPDATE:
+            message = "ROCK_FOTA_UPDATE"
+        case FBIN_FOTA_UPDATE:
+            message = "FBIN_FOTA_UPDATE"
+        default:
+            message = "not found"
+        }
+        printToConsole("returnValue: \(fotaType) means \(message) !")
+    }
+    
+    func onFotaStatusReceived(_ status: Int32) {
+        printToConsole("onFotaStatusReceived: the status is \(status)")
+        var message : String
+        switch status {
+        case FOTA_UPDATE_VIA_BT_TRANSFER_SUCCESS:
+            message = "FOTA_UPDATE_VIA_BT_TRANSFER_SUCCESS"
+        case FOTA_UPDATE_VIA_BT_UPDATE_SUCCESS:
+            message = "FOTA_UPDATE_VIA_BT_UPDATE_SUCCESS"
+        case FOTA_UPDATE_VIA_BT_COMMON_ERROR:
+            message = "FOTA_UPDATE_VIA_BT_COMMON_ERROR"
+        case FOTA_UPDATE_VIA_BT_WRITE_FILE_FAILED:
+            message = "FOTA_UPDATE_VIA_BT_WRITE_FILE_FAILED"
+        case FOTA_UPDATE_VIA_BT_DISK_FULL:
+            message = "FOTA_UPDATE_VIA_BT_DISK_FULL"
+        case FOTA_UPDATE_VIA_BT_TRANSFER_FAILED:
+                message = "FOTA_UPDATE_VIA_BT_TRANSFER_FAILED"
+        case FOTA_UPDATE_VIA_BT_TRIGGER_FAILED:
+            message = "FOTA_UPDATE_VIA_BT_TRIGGER_FAILED"
+        case FOTA_UPDATE_VIA_BT_UPDATE_FAILED:
+            message = "FOTA_UPDATE_VIA_BT_UPDATE_FAILED"
+        case FOTA_UPDATE_VIA_BT_TRIGGER_FAILED_CAUSE_LOW_BATTERY:
+            message = "FOTA_UPDATE_VIA_BT_TRIGGER_FAILED_CAUSE_LOW_BATTERY"
+        default:
+            message = "not found"
+        }
+        printToConsole("status: \(status) means \(message) !")
+    }
+    
+    func onFotaProgress(_ progress: Float) {
+        printToConsole("onFotaProgress: progress is \(progress)")
+    }
+    
+    func onFotaVersionReceived(_ version: FotaVersion!) {
+        printToConsole("onFotaVersionReceived: FotaVersion is \(version)")
     }
 
     var fileDurationTime : [UInt32] = [UInt32](repeating: 0, count: 32)
@@ -189,12 +333,16 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
      Characteristic was read.  Update UI
      */
     func blePeripheral(characteristicRead byteArray: [UInt8], characteristic: CBCharacteristic, blePeripheral: BlePeripheral) {
-        
+        printToConsole("Characteristic is received ! Data from characteristic: \(characteristic.uuid.uuidString). byteArray length is \(byteArray.count).")
         var mode : Int = 0
-        
+        guard byteArray.count > 10 else {
+            printToConsole("byteArray too small, length only \(byteArray.count) !")
+            printToConsole("byteArray : \(byteArray)")
+            return
+        }
         let headerCheck : Bool = (byteArray[0] == 73) && (byteArray[1] == 82) &&
             (byteArray[2] == 84) && (byteArray[3] == 73)
-        printToConsole("Characteristic is received !   byteArray length is \(byteArray.count)")
+        printToConsole("byteArray : \(byteArray)")
         printToConsole("headerCheck is \(headerCheck) ")
         
         if lastPressBtn == 1 {

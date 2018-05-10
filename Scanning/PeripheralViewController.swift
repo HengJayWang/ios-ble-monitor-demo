@@ -36,6 +36,9 @@ class PeripheralViewController: UIViewController, UITableViewDataSource, UITable
     // connected Peripheral
     var blePeripheral:BlePeripheral!
 
+    // DOGP Characteristic for FOTA
+    var dogpReadCharacteristic: CBCharacteristic!
+    var dogpWriteCharacteristic: CBCharacteristic!
     
     /**
      UIView loaded
@@ -202,6 +205,22 @@ class PeripheralViewController: UIViewController, UITableViewDataSource, UITable
             let characteristicViewController = segue.destination as! CharacteristicViewController
             
             if selectedSection < blePeripheral.gattProfile.count {
+                // find DOGP characteristic
+                for service in blePeripheral.gattProfile {
+                    if let chars = service.characteristics {
+                        for char in chars {
+                            if char.uuid.uuidString == "2AA0" {
+                                dogpReadCharacteristic = char
+                                print("Find DOGP Read Characteristic ! uuid is \(dogpReadCharacteristic.uuid)")
+                            }
+                            if char.uuid.uuidString == "2AA1" {
+                                dogpWriteCharacteristic = char
+                                print("Find DOGP Write Characteristic ! uuid is \(dogpWriteCharacteristic.uuid)")
+                            }
+                        }
+                    }
+                }
+                
                 let service = blePeripheral.gattProfile[selectedSection]
                 
                 if let characteristics = blePeripheral.gattProfile[selectedSection].characteristics {
@@ -212,6 +231,12 @@ class PeripheralViewController: UIViewController, UITableViewDataSource, UITable
                         characteristicViewController.blePeripheral = blePeripheral
                         characteristicViewController.connectedService = service
                         characteristicViewController.connectedCharacteristic = characteristics[selectedRow]
+                        if let dogpRead = dogpReadCharacteristic {
+                            characteristicViewController.dogpReadCharacteristic = dogpRead
+                        }
+                        if let dogpWrite = dogpWriteCharacteristic {
+                            characteristicViewController.dogpWriteCharacteristic = dogpWrite
+                        }
                     }
                     
                 }

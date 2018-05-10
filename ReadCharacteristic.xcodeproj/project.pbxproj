@@ -8,6 +8,11 @@
 
 /* Begin PBXBuildFile section */
 		26ED446E2011CB7000A4E5F1 /* WaveformView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26ED446D2011CB7000A4E5F1 /* WaveformView.swift */; };
+		359CCB812099AC80000F0385 /* libBtNotify.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 359CCB802099AC80000F0385 /* libBtNotify.a */; };
+		359CCB89209C3C5A000F0385 /* BtNotify.h in Sources */ = {isa = PBXBuildFile; fileRef = 359CCB872099B961000F0385 /* BtNotify.h */; };
+		359CCB8B209C3CB5000F0385 /* libBtNotify.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 359CCB8A209C3CB4000F0385 /* libBtNotify.a */; };
+		359CCB8E209C46F8000F0385 /* image.bin in Resources */ = {isa = PBXBuildFile; fileRef = 359CCB8D209C46F8000F0385 /* image.bin */; };
+		359CCB9320A1A2BF000F0385 /* MTKBleManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 359CCB9220A1A2BF000F0385 /* MTKBleManager.m */; };
 		7A0531781DDBF3D700A10508 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A0531771DDBF3D700A10508 /* AppDelegate.swift */; };
 		7A05317A1DDBF3D700A10508 /* PeripheralViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A0531791DDBF3D700A10508 /* PeripheralViewController.swift */; };
 		7A05317D1DDBF3D700A10508 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 7A05317B1DDBF3D700A10508 /* Main.storyboard */; };
@@ -24,6 +29,13 @@
 
 /* Begin PBXFileReference section */
 		26ED446D2011CB7000A4E5F1 /* WaveformView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WaveformView.swift; sourceTree = "<group>"; };
+		359CCB802099AC80000F0385 /* libBtNotify.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libBtNotify.a; path = Scanning/lib/libBtNotify.a; sourceTree = "<group>"; };
+		359CCB872099B961000F0385 /* BtNotify.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BtNotify.h; sourceTree = "<group>"; };
+		359CCB8A209C3CB4000F0385 /* libBtNotify.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libBtNotify.a; sourceTree = "<group>"; };
+		359CCB8C209C3D21000F0385 /* ReadCharacteristic-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "ReadCharacteristic-Bridging-Header.h"; sourceTree = "<group>"; };
+		359CCB8D209C46F8000F0385 /* image.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = image.bin; sourceTree = "<group>"; };
+		359CCB9120A1A2BF000F0385 /* MTKBleManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTKBleManager.h; sourceTree = "<group>"; };
+		359CCB9220A1A2BF000F0385 /* MTKBleManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTKBleManager.m; sourceTree = "<group>"; };
 		7A0531741DDBF3D700A10508 /* ReadCharacteristic.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ReadCharacteristic.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7A0531771DDBF3D700A10508 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		7A0531791DDBF3D700A10508 /* PeripheralViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeripheralViewController.swift; sourceTree = "<group>"; };
@@ -45,6 +57,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				359CCB8B209C3CB5000F0385 /* libBtNotify.a in Frameworks */,
+				359CCB812099AC80000F0385 /* libBtNotify.a in Frameworks */,
 				7A05318B1DDBF3E800A10508 /* CoreBluetooth.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -52,6 +66,33 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		359CCB822099ACA9000F0385 /* include */ = {
+			isa = PBXGroup;
+			children = (
+				359CCB8A209C3CB4000F0385 /* libBtNotify.a */,
+				359CCB872099B961000F0385 /* BtNotify.h */,
+				359CCB8C209C3D21000F0385 /* ReadCharacteristic-Bridging-Header.h */,
+			);
+			path = include;
+			sourceTree = "<group>";
+		};
+		359CCB8F20A19067000F0385 /* firmware */ = {
+			isa = PBXGroup;
+			children = (
+				359CCB8D209C46F8000F0385 /* image.bin */,
+			);
+			path = firmware;
+			sourceTree = "<group>";
+		};
+		359CCB9020A19083000F0385 /* Objective-C */ = {
+			isa = PBXGroup;
+			children = (
+				359CCB9120A1A2BF000F0385 /* MTKBleManager.h */,
+				359CCB9220A1A2BF000F0385 /* MTKBleManager.m */,
+			);
+			path = "Objective-C";
+			sourceTree = "<group>";
+		};
 		7A05316B1DDBF3D700A10508 = {
 			isa = PBXGroup;
 			children = (
@@ -72,6 +113,9 @@
 		7A0531761DDBF3D700A10508 /* ReadCharacteristic */ = {
 			isa = PBXGroup;
 			children = (
+				359CCB9020A19083000F0385 /* Objective-C */,
+				359CCB8F20A19067000F0385 /* firmware */,
+				359CCB822099ACA9000F0385 /* include */,
 				7AA66B131DFF799400F3C737 /* Models */,
 				7A05319B1DDD0E7600A10508 /* Delegates */,
 				7A05319A1DDD0E5000A10508 /* UI */,
@@ -85,6 +129,7 @@
 		7A0531891DDBF3E800A10508 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				359CCB802099AC80000F0385 /* libBtNotify.a */,
 				7A05318A1DDBF3E800A10508 /* CoreBluetooth.framework */,
 			);
 			name = Frameworks;
@@ -201,6 +246,7 @@
 				7A0531821DDBF3D700A10508 /* LaunchScreen.storyboard in Resources */,
 				7A05317F1DDBF3D700A10508 /* Assets.xcassets in Resources */,
 				7A05317D1DDBF3D700A10508 /* Main.storyboard in Resources */,
+				359CCB8E209C46F8000F0385 /* image.bin in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -211,6 +257,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				359CCB9320A1A2BF000F0385 /* MTKBleManager.m in Sources */,
+				359CCB89209C3C5A000F0385 /* BtNotify.h in Sources */,
 				7AA66B171DFF7AF100F3C737 /* BlePeripheralDelegate.swift in Sources */,
 				7A05317A1DDBF3D700A10508 /* PeripheralViewController.swift in Sources */,
 				26ED446E2011CB7000A4E5F1 /* WaveformView.swift in Sources */,
@@ -347,8 +395,14 @@
 				INFOPLIST_FILE = Scanning/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Scanning/lib",
+					"$(PROJECT_DIR)/Scanning/include",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = Test.ReadCharacterstic;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "./Scanning/include/ReadCharacteristic-Bridging-Header.h";
 				SWIFT_VERSION = 3.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -363,8 +417,14 @@
 				INFOPLIST_FILE = Scanning/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Scanning/lib",
+					"$(PROJECT_DIR)/Scanning/include",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = Test.ReadCharacterstic;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "./Scanning/include/ReadCharacteristic-Bridging-Header.h";
 				SWIFT_VERSION = 3.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
