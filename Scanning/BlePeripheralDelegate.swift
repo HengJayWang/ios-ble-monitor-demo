@@ -22,7 +22,18 @@ import CoreBluetooth
      - characteristic: the Characteristic that was read
      - blePeripheral: the BlePeripheral
      */
-    @objc optional func blePeripheral(characteristicRead stringValue: [UInt8], characteristic: CBCharacteristic, blePeripheral: BlePeripheral)
+    @objc optional func blePeripheral(characteristicRead stringValue: [UInt8], characteristic: CBCharacteristic, blePeripheral: BlePeripheral, error: Error?)
+    
+    /**
+     Characteristic was write
+     
+     - Parameters:
+     - peripheral: CBPeripheral
+     - characteristic: the Characteristic that was read
+     - blePeripheral: the BlePeripheral
+     */
+    @objc optional func blePeripheral(characteristicWrite peripheral: CBPeripheral, characteristic: CBCharacteristic, blePeripheral: BlePeripheral, error: Error?)
+    
     
     /**
      Characteristics were discovered for a Service
