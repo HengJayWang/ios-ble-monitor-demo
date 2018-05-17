@@ -60,7 +60,7 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
     var btNotify: BtNotify!
  
     // Fota Type
-    var FotaType: Int32 = 5 // Seperate
+    var FotaType: Int32 = 5 // Full bin
     
     /**
      UIView loaded
@@ -144,9 +144,8 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
             let byteArray = [UInt8](data)
             printToConsole("The content size of \(fileName).bin is (Data) : \(data.count)")
             printToConsole("The content size of \(fileName).bin is (byteArray): \(byteArray.count)")
-            let returnValue = btNotify.sendFotaData(FotaType, firmwareData: data)
-            printToConsole("btNotify.sendFotaData returnValue is \(returnValue)")
-            checkReturnValue(returnValue)
+            btNotify.sendFotaData(FotaType, firmwareData: data)
+            printToConsole("btNotify.sendFotaData() run !")
         } catch {
             printToConsole("Parse image.bin string Error !")
         }

@@ -14,7 +14,6 @@
 		359CCB812099AC80000F0385 /* libBtNotify.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 359CCB802099AC80000F0385 /* libBtNotify.a */; };
 		359CCB89209C3C5A000F0385 /* BtNotify.h in Sources */ = {isa = PBXBuildFile; fileRef = 359CCB872099B961000F0385 /* BtNotify.h */; };
 		359CCB8B209C3CB5000F0385 /* libBtNotify.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 359CCB8A209C3CB4000F0385 /* libBtNotify.a */; };
-		359CCB9320A1A2BF000F0385 /* MTKBleManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 359CCB9220A1A2BF000F0385 /* MTKBleManager.m */; };
 		7A0531781DDBF3D700A10508 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A0531771DDBF3D700A10508 /* AppDelegate.swift */; };
 		7A05317A1DDBF3D700A10508 /* PeripheralViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A0531791DDBF3D700A10508 /* PeripheralViewController.swift */; };
 		7A05317D1DDBF3D700A10508 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 7A05317B1DDBF3D700A10508 /* Main.storyboard */; };
@@ -38,8 +37,6 @@
 		359CCB872099B961000F0385 /* BtNotify.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BtNotify.h; sourceTree = "<group>"; };
 		359CCB8A209C3CB4000F0385 /* libBtNotify.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libBtNotify.a; sourceTree = "<group>"; };
 		359CCB8C209C3D21000F0385 /* ReadCharacteristic-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "ReadCharacteristic-Bridging-Header.h"; sourceTree = "<group>"; };
-		359CCB9120A1A2BF000F0385 /* MTKBleManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTKBleManager.h; sourceTree = "<group>"; };
-		359CCB9220A1A2BF000F0385 /* MTKBleManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTKBleManager.m; sourceTree = "<group>"; };
 		7A0531741DDBF3D700A10508 /* ReadCharacteristic.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ReadCharacteristic.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7A0531771DDBF3D700A10508 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		7A0531791DDBF3D700A10508 /* PeripheralViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeripheralViewController.swift; sourceTree = "<group>"; };
@@ -90,15 +87,6 @@
 			path = firmware;
 			sourceTree = "<group>";
 		};
-		359CCB9020A19083000F0385 /* Objective-C */ = {
-			isa = PBXGroup;
-			children = (
-				359CCB9120A1A2BF000F0385 /* MTKBleManager.h */,
-				359CCB9220A1A2BF000F0385 /* MTKBleManager.m */,
-			);
-			path = "Objective-C";
-			sourceTree = "<group>";
-		};
 		7A05316B1DDBF3D700A10508 = {
 			isa = PBXGroup;
 			children = (
@@ -119,7 +107,6 @@
 		7A0531761DDBF3D700A10508 /* ReadCharacteristic */ = {
 			isa = PBXGroup;
 			children = (
-				359CCB9020A19083000F0385 /* Objective-C */,
 				359CCB8F20A19067000F0385 /* firmware */,
 				359CCB822099ACA9000F0385 /* include */,
 				7AA66B131DFF799400F3C737 /* Models */,
@@ -265,7 +252,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				359CCB9320A1A2BF000F0385 /* MTKBleManager.m in Sources */,
 				359CCB89209C3C5A000F0385 /* BtNotify.h in Sources */,
 				7AA66B171DFF7AF100F3C737 /* BlePeripheralDelegate.swift in Sources */,
 				7A05317A1DDBF3D700A10508 /* PeripheralViewController.swift in Sources */,

@@ -10,7 +10,6 @@
 #define ReadCharacteristic_Bridging_Header_h
 
 #import "BtNotify.h"
-#import "MTKBleManager.h"
-//#import "CachedBLEDevice.h"
+
 
 #endif /* ReadCharacteristic_Bridging_Header_h */
