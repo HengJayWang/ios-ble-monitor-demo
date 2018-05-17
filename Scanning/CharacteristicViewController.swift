@@ -60,7 +60,7 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
     var btNotify: BtNotify!
  
     // Fota Type
-    var FotaType: Int32 = 5 // Full bin
+    var FotaType: Int32 = 5 // Seperate
     
     /**
      UIView loaded
@@ -75,15 +75,7 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
         centralManager.delegate = self
         blePeripheral.delegate = self
         
-        btNotify = (BtNotify.sharedInstance() as! BtNotify)
-        btNotify.register(self as NotifyCustomDelegate)
-        btNotify.register(self as NotifyFotaDelegate)
         FotaSetting()
-    }
-    
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-
     }
     
     @IBAction func notifyCharacteristic(_ sender: UISwitch) {
@@ -104,6 +96,8 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
         writeFOTAButton.isEnabled = false
         startTimeTextField.isEnabled = false
         durationTimeTextField.isEnabled = false
+        consoleTextView.isEditable = false
+        consoleTextView.isSelectable = false
         blePeripheral.peripheral.setNotifyValue(true, for: connectedCharacteristic)
     }
     
@@ -120,13 +114,16 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
             printToConsole("The FOTA characteristic not found, FOTA setting is quit !")
             return
         }
+        
+        btNotify = (BtNotify.sharedInstance() as! BtNotify)
+        btNotify.register(self as NotifyCustomDelegate)
+        btNotify.register(self as NotifyFotaDelegate)
        
         if dogpCharFind {
-            printToConsole("btNotify.setGattParameters run ! (Start)")
             btNotify.setGattParameters(blePeripheral.peripheral,
                                        write: dogpWriteCharacteristic,
                                        read: dogpReadCharacteristic)
-            printToConsole("btNotify.setGattParameters run ! (End)")
+            printToConsole("btNotify.setGattParameters run succeed ! ")
         }
         btNotify.updateConnectionState(Int32(CBPeripheralState.connected.rawValue))
         
@@ -134,7 +131,8 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
     }
     
     @IBAction func writeFOTA(_ sender: UIButton) {
-        let bundlePath = Bundle.main.url(forResource: "image", withExtension: "bin")
+        let fileName = "fota_download_manager_image"
+        let bundlePath = Bundle.main.url(forResource: fileName, withExtension: "bin")
         printToConsole("bundlePath of image.bin is " + (bundlePath?.path)!)
         
         let response = btNotify.sendFotaTypeGetCmd()
@@ -144,8 +142,8 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
         do {
             let data = try Data(contentsOf: bundlePath!)
             let byteArray = [UInt8](data)
-            printToConsole("The content size of image.bin is (Data) : \(data.count)")
-            printToConsole("The content size of image.bin is (byteArray): \(byteArray.count)")
+            printToConsole("The content size of \(fileName).bin is (Data) : \(data.count)")
+            printToConsole("The content size of \(fileName).bin is (byteArray): \(byteArray.count)")
             let returnValue = btNotify.sendFotaData(FotaType, firmwareData: data)
             printToConsole("btNotify.sendFotaData returnValue is \(returnValue)")
             checkReturnValue(returnValue)
@@ -176,7 +174,7 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
     
     /* Implement function for NotifyCustomDelegete */
     func onDataArrival(_ receiver: String!, arrivalData data: Data!) {
-        //printToConsole("onDataArrival: the receiver : \(receiver), arrivalData length : \(data.count))")
+        printToConsole("onDataArrival: the receiver : \(receiver), arrivalData length : \(data.count))")
     }
     
     func onReady(toSend ready: Bool) {
@@ -184,7 +182,7 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
     }
     
     func onProgress(_ sender: String!, newProgress progress: Float) {
-        print("onProgress: the sender is \(sender), progress: \(progress)")
+        printToConsole("onProgress: the sender is \(sender), progress: \(progress)")
     }
     
     /* Implement function for NotifyFotaDelegete */
@@ -208,7 +206,7 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
     }
     
     func onFotaStatusReceived(_ status: Int32) {
-        print("onFotaStatusReceived: the status is \(status)")
+        printToConsole("onFotaStatusReceived: the status is \(status)")
         var message : String
         switch status {
         case FOTA_UPDATE_VIA_BT_TRANSFER_SUCCESS:
@@ -232,11 +230,11 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
         default:
             message = "not found"
         }
-        print("status: \(status) means \(message) !")
+        printToConsole("status: \(status) means \(message) !")
     }
     
     func onFotaProgress(_ progress: Float) {
-        printToConsole("onFotaProgress: progress is \(progress)")
+        printToConsole("onFotaProgress: progress is \(String(format:"%.2f",progress*100)) %")
     }
     
     func onFotaVersionReceived(_ version: FotaVersion!) {
