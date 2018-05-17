@@ -1,5 +1,5 @@
 # hengjay-ios-monitor
 
-Little ios practice with swift 4 / Xcode 9
+The simple practice for iOS BLE monitor with Swift 4 / Xcode 9.
 
 
