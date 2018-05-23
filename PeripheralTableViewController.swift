@@ -55,12 +55,21 @@ class PeripheralTableViewController: UITableViewController, CBCentralManagerDele
         
     }
     
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        //centralManager = nil
+        print("Clean centralManager")
+    }
     
     /**
      User touched the "Scan/Stop" button
      */
     @IBAction func onScanButtonClicked(_ sender: UIButton) {
         print("scan button clicked")
+        if centralManager == nil {
+            centralManager = CBCentralManager(delegate: self, queue: nil)
+            print("Re-Initializing central manager")
+        }
         // if scanning
         if centralManager.isScanning {
             stopBleScan()
@@ -78,6 +87,8 @@ class PeripheralTableViewController: UITableViewController, CBCentralManagerDele
         blePeripherals.removeAll()
         tableView.reloadData()
         print ("discovering devices")
+        print(centralManager)
+        print(blePeripherals)
         scanCountdown = scanTimeout_s
         scanTimer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(updateScanCounter), userInfo: nil, repeats: true)
         

@@ -40,6 +40,10 @@ class PeripheralViewController: UIViewController, UITableViewDataSource, UITable
     var dogpReadCharacteristic: CBCharacteristic!
     var dogpWriteCharacteristic: CBCharacteristic!
     
+    // Info Characteristic
+    var batteryCharacteristic: CBCharacteristic!
+    var systemInfoCharacteristic: CBCharacteristic!
+    
     /**
      UIView loaded
      */
@@ -209,13 +213,21 @@ class PeripheralViewController: UIViewController, UITableViewDataSource, UITable
                 for service in blePeripheral.gattProfile {
                     if let chars = service.characteristics {
                         for char in chars {
-                            if char.uuid.uuidString == "2AA0" {
+                            switch (char.uuid.uuidString) {
+                            case "2AA0":
                                 dogpReadCharacteristic = char
-                                print("Find DOGP Read Characteristic ! uuid is \(dogpReadCharacteristic.uuid)")
-                            }
-                            if char.uuid.uuidString == "2AA1" {
+                                print("Find DOGP Read Characteristic ! uuid is \(dogpReadCharacteristic.uuid.uuidString)")
+                            case "2AA1":
                                 dogpWriteCharacteristic = char
-                                print("Find DOGP Write Characteristic ! uuid is \(dogpWriteCharacteristic.uuid)")
+                                print("Find DOGP Write Characteristic ! uuid is \(dogpWriteCharacteristic.uuid.uuidString)")
+                            case "2A19":
+                                batteryCharacteristic = char
+                                print("Find Battery Characteristic ! uuid is \(batteryCharacteristic.uuid.uuidString)")
+                            case "4AA1":
+                                systemInfoCharacteristic = char
+                                print("Find System Info Characteristic ! uuid is \(systemInfoCharacteristic.uuid.uuidString)")
+                            default:
+                                print("Characteristic \(char.uuid.uuidString) is not specific char !")
                             }
                         }
                     }
@@ -236,6 +248,12 @@ class PeripheralViewController: UIViewController, UITableViewDataSource, UITable
                         }
                         if let dogpWrite = dogpWriteCharacteristic {
                             characteristicViewController.dogpWriteCharacteristic = dogpWrite
+                        }
+                        if let batteryInfo = batteryCharacteristic {
+                            characteristicViewController.batteryCharacteristic = batteryInfo
+                        }
+                        if let systemInfo = systemInfoCharacteristic {
+                            characteristicViewController.systemInfoCharacteristic = systemInfo
                         }
                     }
                     

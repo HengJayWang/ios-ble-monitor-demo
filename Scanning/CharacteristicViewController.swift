@@ -56,6 +56,10 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
     var dogpWriteCharacteristic: CBCharacteristic!
     var dogpCharFind: Bool = false
     
+    // Info Characteristic
+    var batteryCharacteristic: CBCharacteristic!
+    var systemInfoCharacteristic: CBCharacteristic!
+    
     // BtNotify Library
     var btNotify: BtNotify!
  
@@ -70,11 +74,11 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
         loadUI()
         printToConsole("Will connect to device \(blePeripheral.peripheral.identifier.uuidString)")
         printToConsole("Will connect to characteristic \(connectedCharacteristic.uuid.uuidString)")
-        printToConsole("The current periphral: \(blePeripheral.peripheral)")
         
         centralManager.delegate = self
         blePeripheral.delegate = self
         
+        readSystemInfo()
         FotaSetting()
     }
     
@@ -99,6 +103,11 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
         consoleTextView.isEditable = false
         consoleTextView.isSelectable = false
         blePeripheral.peripheral.setNotifyValue(true, for: connectedCharacteristic)
+    }
+    
+    func readSystemInfo() {
+        if let battery = batteryCharacteristic {blePeripheral.readValue(from: battery)}
+        if let systemInfo = systemInfoCharacteristic {blePeripheral.readValue(from: systemInfo)}
     }
     
     func FotaSetting() {
@@ -131,9 +140,9 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
     }
     
     @IBAction func writeFOTA(_ sender: UIButton) {
-        let fileName = "fota_download_manager_image"
+        let fileName = "ITRI_HDK_image"
         let bundlePath = Bundle.main.url(forResource: fileName, withExtension: "bin")
-        printToConsole("bundlePath of image.bin is " + (bundlePath?.path)!)
+        printToConsole("bundlePath of \(fileName) is " + (bundlePath?.path)!)
         
         let response = btNotify.sendFotaTypeGetCmd()
         printToConsole("btNotify.sendFotaTypeGetCmd() response is \(response)")
@@ -141,9 +150,7 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
         
         do {
             let data = try Data(contentsOf: bundlePath!)
-            let byteArray = [UInt8](data)
             printToConsole("The content size of \(fileName).bin is (Data) : \(data.count)")
-            printToConsole("The content size of \(fileName).bin is (byteArray): \(byteArray.count)")
             btNotify.sendFotaData(FotaType, firmwareData: data)
             printToConsole("btNotify.sendFotaData() run !")
         } catch {
@@ -335,44 +342,51 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
      Characteristic was read.  Update UI
      */
     func blePeripheral(characteristicRead byteArray: [UInt8], characteristic: CBCharacteristic, blePeripheral: BlePeripheral, error: Error?) {
-        //printToConsole("Characteristic is received ! Data from characteristic: \(characteristic.uuid.uuidString). byteArray length is \(byteArray.count).")
-        if characteristic.uuid.uuidString == dogpReadCharacteristic.uuid.uuidString {
+        
+        switch characteristic.uuid.uuidString {
+        case "2AA0":
             btNotify.handleReadReceivedData(characteristic, error: error)
-            //printToConsole("btNotify.handleReadReceivedData is called !")
-            return
-        }
-        
-        var mode : Int = 0
-        guard byteArray.count > 10 else {
-            //printToConsole("byteArray too small, length only \(byteArray.count) !")
-            //printToConsole("byteArray : \(byteArray)")
-            return
-        }
-        let headerCheck : Bool = (byteArray[0] == 73) && (byteArray[1] == 82) &&
-            (byteArray[2] == 84) && (byteArray[3] == 73)
-        //printToConsole("byteArray : \(byteArray)")
-        //printToConsole("headerCheck is \(headerCheck) ")
-        
-        if lastPressBtn == 1 {
-            printToConsole("signal Max is \(waveformArea.signal1Max), min is \(waveformArea.signal1Min)")
-        }
-        if  headerCheck && byteArray[5] == 171 {
-            mode = Int(byteArray[4])
-        }
-        
-        switch mode {
-        case 2:
-            let dataArray = [UInt8](byteArray[12...])
-            if dataArray.count == 212 { parseRealTimeMode(dataArray: dataArray) }
-        case 3:
-            let dataArray = [UInt8](byteArray[12...])
-            if dataArray.count == 212 { parseRPeakMode(dataArray: dataArray) }
-        case 6:
-            let dataArray = [UInt8](byteArray[12...])
-            let dataLength = Int(byteArray[7]) << 8 + Int(byteArray[6])
-            parseGetFileListDate(dataArray: dataArray, dataLength: dataLength)
+        case "2A19":
+            printToConsole("Battery characteristic received! battery is \(byteArray[0])%")
+        case "4AA0":
+            var mode : Int = 0
+            
+            let headerCheck : Bool = (byteArray[0] == 73) && (byteArray[1] == 82) &&
+                (byteArray[2] == 84) && (byteArray[3] == 73)
+            
+            if lastPressBtn == 1 {
+                printToConsole("signal Max is \(waveformArea.signal1Max), min is \(waveformArea.signal1Min)")
+            }
+            if  headerCheck && byteArray[5] == 171 {
+                mode = Int(byteArray[4])
+            }
+            
+            switch mode {
+            case 2:
+                let dataArray = [UInt8](byteArray[12...])
+                if dataArray.count == 212 { parseRealTimeMode(dataArray: dataArray) }
+            case 3:
+                let dataArray = [UInt8](byteArray[12...])
+                if dataArray.count == 212 { parseRPeakMode(dataArray: dataArray) }
+            case 6:
+                let dataArray = [UInt8](byteArray[12...])
+                let dataLength = Int(byteArray[7]) << 8 + Int(byteArray[6])
+                parseGetFileListDate(dataArray: dataArray, dataLength: dataLength)
+            default:
+                printToConsole("Parse mode not find, mode value is \(mode)")
+            }
+        case "4AA1":
+            printToConsole("SystemInfo characteristic received! byteArray length is \(byteArray.count)")
+            if (byteArray.count == 96) {
+                let venderName: String! = String(bytes: byteArray[0...31], encoding: .utf8 )
+                let boardName: String! = String(bytes: byteArray[31...63], encoding: .utf8 )
+                let fwVersion: String! = String(bytes: byteArray[64...95], encoding: .utf8 )
+                printToConsole("System Info - Vender Name : \(venderName!)")
+                printToConsole("System Info - Board Name : \(boardName!)")
+                printToConsole("System Info - firmware Version : \(fwVersion!)")
+            }
         default:
-            printToConsole("Parse mode not find, mode value is \(mode)")
+            printToConsole("Characteristic \(characteristic.uuid.uuidString) not found !byteArray length is \(byteArray.count) ")
         }
         
     }
