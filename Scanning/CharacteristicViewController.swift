@@ -249,8 +249,8 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
 
     var fileDurationTime : [UInt32] = [UInt32](repeating: 0, count: 32)
     let header : UInt32 = 0x49545249
-    let cmdType : [UInt16] = [0xAB01, 0xAB02, 0xAB03, 0xAB04, 0xAB05, 0xAB06, 0xAB07]
-    var cmdData : [Bool] = [false, false, false, false, false, false, false]
+    let cmdType : [UInt16] = [0xAB01, 0xAB02, 0xAB03, 0xAB04, 0xAB05, 0xAB06, 0xAB07, 0xAB08, 0xAB09]
+    var cmdData : [Bool] = [false, false, false, false, false, false, false, false, false]
     let comment = "FFFFFFFF"
     var lastPressBtn : Int = 0
     
@@ -291,6 +291,8 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
         cmdData[lastPressBtn] = !cmdData[lastPressBtn]
         cmdData[5] = false
         cmdData[6] = false
+        cmdData[7] = false
+        cmdData[8] = false
         printToConsole("The string will be write to peripheral: \(commandStr)")
         return commandStr
     }
@@ -372,6 +374,9 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
                 let dataArray = [UInt8](byteArray[12...])
                 let dataLength = Int(byteArray[7]) << 8 + Int(byteArray[6])
                 parseGetFileListDate(dataArray: dataArray, dataLength: dataLength)
+            case 9:
+                let dataArray = [UInt8](byteArray[8...])
+                parseSystemInfo(dataArray: dataArray)
             default:
                 printToConsole("Parse mode not find, mode value is \(mode)")
             }
@@ -391,13 +396,58 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
         
     }
     
+    func parseSystemInfo (dataArray: [UInt8]) {
+        guard dataArray.count == 24 else {
+            printToConsole("[parseSystemInfoError] dataArray length is: \(dataArray.count) not 24 bytes")
+            return
+        }
+        
+        let systemTime = parseTime(time: [UInt8](dataArray[0...3]))
+        let ststemStatus = byteToUInt32(bytes: [UInt8](dataArray[4...7]) )
+        let recFileIndex = byteToUInt32(bytes: [UInt8](dataArray[8...11]) )
+        let recFileCreateTime = parseTime(time: [UInt8](dataArray[12...15]) )
+        let recFileDurationTime = byteToUInt32(bytes: [UInt8](dataArray[16...19]) )
+        let systemError = byteToUInt32(bytes: [UInt8](dataArray[20...23]) )
+        
+        printToConsole("""
+        Read systemInfo success! :
+        systemTime : \(systemTime)
+        ststemStatus : \(ststemStatus)
+        recFileIndex : \(recFileIndex)
+        recFileCreateTime : \(recFileCreateTime)
+        recFileDurationTime : \(recFileDurationTime)
+        systemError : \(systemError)
+        """)
+        
+    }
+    
+    func parseTime(time: [UInt8]) -> String  {
+        guard time.count == 4 else {return "Time array need 4 byte format!"}
+        let year : UInt8 = time[3] >> 2
+        let month : UInt8 = (time[3] % 4) << 2 + time[2] >> 6
+        let day : UInt8 = (time[2] >> 1) % 32
+        let hour : UInt8 = (time[2] % 2) << 4 + time[1] >> 4
+        let min : UInt8 = (time[1] % 16) << 2 + time[0] >> 6
+        let sec : UInt8 = time[0] % 64
+        return "\(Int(year)+2000)-\(month)-\(day) \(hour):\(min):\(sec)"
+    }
+    
+    func byteToUInt32 (bytes: [UInt8]) -> UInt32 {
+         if bytes.count == 4 {
+            let data = Data(bytes: bytes)
+            return UInt32(littleEndian: data.withUnsafeBytes { $0.pointee })
+        } else {
+            printToConsole("the bytes length is \(bytes.count)")
+            return UInt32(littleEndian: 0)
+        }
+    }
+    
     func parseGetFileListDate (dataArray: [UInt8], dataLength: Int) {
        
         let dataInRange = dataArray.count > dataLength
 
         let message = """
         Parse GetFileList Mode :
-        The dataArray is \(dataArray)
         The array length is \(dataArray.count)
         The data length is \(dataLength)
         dataInRange is \(dataInRange)
@@ -528,7 +578,7 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
         
         let currentTime = String(format: "%02X", byte4) + String(format: "%02X", byte3) +
             String(format: "%02X", byte2) + String(format: "%02X", byte1)
-        printToConsole("currentTime in 4 bytes formatis : " + currentTime)
+        printToConsole("currentTime in 4 bytes format is : " + currentTime)
         return currentTime
     }
     // MARK: CBCentralManagerDelegate
