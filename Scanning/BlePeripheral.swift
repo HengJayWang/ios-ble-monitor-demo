@@ -13,11 +13,11 @@ extension String {
     /*var count: Int {
         return self.characters.count
     }*/
-    
+
     subscript (i: Int) -> Character {
         return self[index(startIndex, offsetBy: i)]
     }
-    
+
     subscript (i: Int) -> String {
         return String(self[i] as Character)
     }
@@ -27,28 +27,27 @@ extension String {
  BlePeripheral Handles communication with a Bluetooth Low Energy Peripheral
  */
 class BlePeripheral: NSObject, CBPeripheralDelegate {
-    
+
     // MARK: Peripheral properties
-    
+
     // delegate
-    var delegate:BlePeripheralDelegate?
-    
+    var delegate: BlePeripheralDelegate?
+
     // connected Peripheral
-    var peripheral:CBPeripheral!
-    
+    var peripheral: CBPeripheral!
+
     // advertised name
-    var advertisedName:String!
-    
+    var advertisedName: String!
+
     // the size of the characteristic
     let characteristicLength = 32
-    
+
     // RSSI
-    var rssi:NSNumber!
-    
+    var rssi: NSNumber!
+
     // GATT profile tree
     var gattProfile = [CBService]()
-    
-    
+
     /**
      Initialize BlePeripheral with a corresponding Peripheral
      
@@ -62,8 +61,7 @@ class BlePeripheral: NSObject, CBPeripheralDelegate {
         self.peripheral.delegate = self
         self.delegate = delegate
     }
-    
-    
+
     /**
      Notify the BlePeripheral that the peripheral has been connected
      
@@ -73,24 +71,23 @@ class BlePeripheral: NSObject, CBPeripheralDelegate {
     func connected(peripheral: CBPeripheral) {
         self.peripheral = peripheral
         self.peripheral.delegate = self
-        
+
         // check for services and the RSSI
         self.peripheral.readRSSI()
         self.peripheral.discoverServices(nil)
     }
-    
-    
+
     /**
      Get a broadcast name from an advertisementData packet.  This may be different than the actual broadcast name
      */
-    static func getNameFromAdvertisementData(advertisementData: [String : Any]) -> String? {
+    static func getNameFromAdvertisementData(advertisementData: [String: Any]) -> String? {
         // grab thekCBAdvDataLocalName from the advertisementData to see if there's an alternate broadcast name
         if advertisementData["kCBAdvDataLocalName"] != nil {
             return (advertisementData["kCBAdvDataLocalName"] as! String)
         }
         return nil
     }
-    
+
     /**
      Determine if this peripheral is connectable from it's advertisementData packet.
      */
@@ -98,33 +95,32 @@ class BlePeripheral: NSObject, CBPeripheralDelegate {
         let isConnectable = advertisementData["kCBAdvDataIsConnectable"] as! Bool
         return isConnectable
     }
-    
-    
+
     /**
      Read from a Characteristic
      */
     func readValue(from characteristic: CBCharacteristic) {
         self.peripheral.readValue(for: characteristic)
     }
-    
+
     /**
      Hex String to ByteArray
      */
- 
+
     func hexStrToByteArray( hexStr: String ) -> [UInt8] {
         var result = [UInt8](repeating: 0, count: hexStr.count/2 )
         for i in 1...(hexStr.count)/2 {
             let str = hexStr[2*i-2] + hexStr[2*i-1]
-            result[i-1] = UInt8(str, radix:16)!
+            result[i-1] = UInt8(str, radix: 16)!
         }
         return result
     }
-    
+
     /**
      Write to Characteristic
      */
     func writeValue(value: String, to characteristic: CBCharacteristic) {
-        
+
         let byteValue = hexStrToByteArray(hexStr: value)
         print("byteValue is \(byteValue)")
         print("byteValue count is \(byteValue.count)")
@@ -133,21 +129,21 @@ class BlePeripheral: NSObject, CBPeripheralDelegate {
         if length > characteristicLength {
             length = characteristicLength
         }
-        
+
         let transmissableValue = Data(Array(byteValue[0..<length]))
-        
+
         print("transmissableValue is \(transmissableValue)")
-        
+
         var writeType = CBCharacteristicWriteType.withResponse
         if BlePeripheral.isCharacteristic(isWriteableWithoutResponse: characteristic) {
             writeType = CBCharacteristicWriteType.withoutResponse
         }
-        
+
         peripheral.writeValue(transmissableValue, for: characteristic, type: writeType)
-        
+
         print("write request sent")
     }
-    
+
     /**
      Check if Characteristic is writeable without response
      
@@ -162,7 +158,7 @@ class BlePeripheral: NSObject, CBPeripheralDelegate {
         }
         return false
     }
-    
+
     /**
      Check if Characteristic is readable
      
@@ -177,7 +173,7 @@ class BlePeripheral: NSObject, CBPeripheralDelegate {
         }
         return false
     }
-    
+
     /**
      Check if Characteristic is writeable
      
@@ -193,21 +189,20 @@ class BlePeripheral: NSObject, CBPeripheralDelegate {
         }
         return false
     }
-    
+
     // MARK: CBPeripheralDelegate
-    
-    
+
     /**
      Value downloaded from Characteristic on connected Peripheral
      */
     func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
-        
+
         if let value = characteristic.value {
-            
+
             // Note: if we need to work with byte arrays instead of Strings, we can do this
             let byteArray = [UInt8](value)
             delegate?.blePeripheral?(characteristicRead: byteArray, characteristic: characteristic, blePeripheral: self, error: error)
-            
+
             // or this:
             // let byteArray:[UInt8] = Array(outboundValue.withCString)
             /*
@@ -227,7 +222,7 @@ class BlePeripheral: NSObject, CBPeripheralDelegate {
             }
             print(floatValue);
             */
-            
+
             /*
             if let stringValue = String(data: value, encoding: .ascii) {
                 
@@ -239,15 +234,14 @@ class BlePeripheral: NSObject, CBPeripheralDelegate {
                 
             }
             */
- 
+
         }
     }
-    
+
     func peripheral(_ peripheral: CBPeripheral, didWriteValueFor characteristic: CBCharacteristic, error: Error?) {
         delegate?.blePeripheral?(characteristicWrite: peripheral, characteristic: characteristic, blePeripheral: self, error: error)
     }
-    
-    
+
     /**
      Servicess were discovered on the connected Peripheral
      */
@@ -255,20 +249,19 @@ class BlePeripheral: NSObject, CBPeripheralDelegate {
         print("services discovered")
         // clear GATT profile - start with fresh services listing
         gattProfile.removeAll()
-        
+
         if error != nil {
             print("Discover service Error: \(String(describing: error))")
         } else {
             print("Discovered Service")
-            for service in peripheral.services!{
+            for service in peripheral.services! {
                 self.peripheral.discoverCharacteristics(nil, for: service)
             }
             print(peripheral.services!)
         }
-        
+
     }
-    
-    
+
     /**
      Characteristics were discovered for a Service on the connected Peripheral
      */
@@ -276,28 +269,23 @@ class BlePeripheral: NSObject, CBPeripheralDelegate {
         print("characteristics discovered")
         // grab the service
         let serviceIdentifier = service.uuid.uuidString
-        
-        
+
         print("service: \(serviceIdentifier)")
-        
-        
+
         gattProfile.append(service)
-        
-        
+
         if let characteristics = service.characteristics {
-            
+
             print("characteristics found: \(characteristics.count)")
             for characteristic in characteristics {
                 print("-> \(characteristic.uuid.uuidString)")
-                
+
             }
-            
-            delegate?.blePerihperal?(discoveredCharacteristics: characteristics, forService: service,blePeripheral: self)
+
+            delegate?.blePerihperal?(discoveredCharacteristics: characteristics, forService: service, blePeripheral: self)
         }
     }
-    
-    
-    
+
     /**
      RSSI read from peripheral.
      */
@@ -306,5 +294,5 @@ class BlePeripheral: NSObject, CBPeripheralDelegate {
         rssi = RSSI
         delegate?.blePeripheral?(readRssi: rssi, blePeripheral: self)
     }
-    
+
 }

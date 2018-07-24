@@ -13,7 +13,7 @@ import CoreBluetooth
  BlePeripheral relays important status changes from BlePeripheral
  */
 @objc protocol BlePeripheralDelegate: class {
-    
+
     /**
      Characteristic was read
      
@@ -23,7 +23,7 @@ import CoreBluetooth
      - blePeripheral: the BlePeripheral
      */
     @objc optional func blePeripheral(characteristicRead stringValue: [UInt8], characteristic: CBCharacteristic, blePeripheral: BlePeripheral, error: Error?)
-    
+
     /**
      Characteristic was write
      
@@ -33,8 +33,7 @@ import CoreBluetooth
      - blePeripheral: the BlePeripheral
      */
     @objc optional func blePeripheral(characteristicWrite peripheral: CBPeripheral, characteristic: CBCharacteristic, blePeripheral: BlePeripheral, error: Error?)
-    
-    
+
     /**
      Characteristics were discovered for a Service
      
@@ -44,7 +43,7 @@ import CoreBluetooth
      - blePeripheral: the BlePeripheral
      */
     @objc optional func blePerihperal(discoveredCharacteristics characteristics: [CBCharacteristic], forService: CBService, blePeripheral: BlePeripheral)
-    
+
     /**
      RSSI was read for a Peripheral
      

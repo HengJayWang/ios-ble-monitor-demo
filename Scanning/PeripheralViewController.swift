@@ -13,37 +13,36 @@ import CoreBluetooth
  This view lists the GATT profile of a connected characteristic
  */
 class PeripheralViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, CBCentralManagerDelegate, BlePeripheralDelegate {
-    
+
     // MARK: UI Elements
     @IBOutlet weak var advertisedNameLabel: UILabel!
     @IBOutlet weak var identifierLabel: UILabel!
     @IBOutlet weak var rssiLabel: UILabel!
     @IBOutlet weak var gattProfileTableView: UITableView!
     @IBOutlet weak var gattTableView: UITableView!
-    
+
     // Gatt Table Cell Reuse Identifier
     let gattCellReuseIdentifier = "GattTableViewCell"
-    
+
     // Segue
     let segueIdentifier = "LoadCharacteristicViewSegue"
-    
-    
+
     // MARK: Connected Peripheral Properties
-    
+
     // Central Manager
-    var centralManager:CBCentralManager!
-    
+    var centralManager: CBCentralManager!
+
     // connected Peripheral
-    var blePeripheral:BlePeripheral!
+    var blePeripheral: BlePeripheral!
 
     // DOGP Characteristic for FOTA
     var dogpReadCharacteristic: CBCharacteristic!
     var dogpWriteCharacteristic: CBCharacteristic!
-    
+
     // Info Characteristic
     var batteryCharacteristic: CBCharacteristic!
     var systemInfoCharacteristic: CBCharacteristic!
-    
+
     /**
      UIView loaded
      */
@@ -56,42 +55,37 @@ class PeripheralViewController: UIViewController, UITableViewDataSource, UITable
         centralManager.delegate = self
         centralManager.connect(blePeripheral.peripheral)
     }
-    
-    
-    
+
     // MARK: BlePeripheralDelegate
-    
+
     /**
      Characteristics were discovered.  Update the UI
      */
     func blePerihperal(discoveredCharacteristics characteristics: [CBCharacteristic], forService: CBService, blePeripheral: BlePeripheral) {
         gattTableView.reloadData()
     }
-    
+
     /**
      RSSI discovered.  Update UI
      */
     func blePeripheral(readRssi rssi: NSNumber, blePeripheral: BlePeripheral) {
         rssiLabel.text = rssi.stringValue
     }
-    
-    
-    
+
     // MARK: CBCentralManagerDelegate code
-    
-    
+
     /**
      Peripheral connected.  Update UI
      */
     func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
         print("Connected Peripheral: \(String(describing: peripheral.name))")
-        
+
         advertisedNameLabel.text = blePeripheral.advertisedName
         identifierLabel.text = blePeripheral.peripheral.identifier.uuidString
-        
+
         blePeripheral.connected(peripheral: peripheral)
     }
-    
+
     /**
      Connection to Peripheral failed.
      */
@@ -99,7 +93,7 @@ class PeripheralViewController: UIViewController, UITableViewDataSource, UITable
         print("failed to connect")
         print(error.debugDescription)
     }
-    
+
     /**
      Peripheral disconnected.  Leave UIView
      */
@@ -107,13 +101,13 @@ class PeripheralViewController: UIViewController, UITableViewDataSource, UITable
         print("Disconnected Peripheral: \(String(describing: peripheral.name))")
         dismiss(animated: true, completion: nil)
     }
-    
+
     /**
      Bluetooth radio state changed.
      */
     func centralManagerDidUpdateState(_ central: CBCentralManager) {
         print("Central Manager updated: checking state")
-        
+
         switch (central.state) {
         case .poweredOn:
             print("bluetooth on")
@@ -121,12 +115,9 @@ class PeripheralViewController: UIViewController, UITableViewDataSource, UITable
             print("bluetooth unavailable")
         }
     }
-    
 
-    
-    
     // MARK: UITableViewDataSource
-    
+
     /**
      Return number of rows in Service section
      */
@@ -139,18 +130,17 @@ class PeripheralViewController: UIViewController, UITableViewDataSource, UITable
         }
         return 0
     }
-    
+
     /**
      Return a rendered cell for a Characteristic
      */
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         print("returning table cell")
         let cell = tableView.dequeueReusableCell(withIdentifier: gattCellReuseIdentifier, for: indexPath) as! GattTableViewCell
-        
+
         let section = indexPath.section
         let row = indexPath.row
-        
-        
+
         if section < blePeripheral.gattProfile.count {
             if let characteristics = blePeripheral.gattProfile[section].characteristics {
                 if row < characteristics.count {
@@ -158,10 +148,10 @@ class PeripheralViewController: UIViewController, UITableViewDataSource, UITable
                 }
             }
         }
-        
+
         return cell
     }
-    
+
     /**
      Return the number of Service sections
      */
@@ -171,7 +161,7 @@ class PeripheralViewController: UIViewController, UITableViewDataSource, UITable
         print(blePeripheral.gattProfile)
         return blePeripheral.gattProfile.count
     }
-    
+
     /**
      Return the title for a Service section
      */
@@ -182,8 +172,7 @@ class PeripheralViewController: UIViewController, UITableViewDataSource, UITable
         }
         return nil
     }
-    
-    
+
     /**
      User selected a Characteristic table cell.  Update UI and open the next UIView
      */
@@ -191,9 +180,7 @@ class PeripheralViewController: UIViewController, UITableViewDataSource, UITable
         let selectedRow = indexPath.row
         print("Selected Row: \(selectedRow)")
     }
-    
-    
-    
+
     // MARK: Navigation
 
     /**
@@ -201,13 +188,13 @@ class PeripheralViewController: UIViewController, UITableViewDataSource, UITable
      */
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         print("leaving view - disconnecting from peripheral")
-        
+
         if let indexPath = gattTableView.indexPathForSelectedRow {
             let selectedSection = indexPath.section
             let selectedRow = indexPath.row
-            
+
             let characteristicViewController = segue.destination as! CharacteristicViewController
-            
+
             if selectedSection < blePeripheral.gattProfile.count {
                 // find DOGP characteristic
                 for service in blePeripheral.gattProfile {
@@ -232,12 +219,12 @@ class PeripheralViewController: UIViewController, UITableViewDataSource, UITable
                         }
                     }
                 }
-                
+
                 let service = blePeripheral.gattProfile[selectedSection]
-                
+
                 if let characteristics = blePeripheral.gattProfile[selectedSection].characteristics {
-                    
-                    if selectedRow < characteristics.count {                        
+
+                    if selectedRow < characteristics.count {
                         // populate next UIView with necessary information
                         characteristicViewController.centralManager = centralManager
                         characteristicViewController.blePeripheral = blePeripheral
@@ -256,17 +243,16 @@ class PeripheralViewController: UIViewController, UITableViewDataSource, UITable
                             characteristicViewController.systemInfoCharacteristic = systemInfo
                         }
                     }
-                    
+
                 }
             }
             gattTableView.deselectRow(at: indexPath, animated: true)
-            
+
         } else {
             if let peripheral = blePeripheral.peripheral {
                 centralManager.cancelPeripheralConnection(peripheral)
             }
         }
-        
+
     }
 }
-
