@@ -41,6 +41,7 @@ class PeripheralViewController: UIViewController, UITableViewDataSource, UITable
 
     // Info Characteristic
     var batteryCharacteristic: CBCharacteristic!
+    var commandCharacteristic: CBCharacteristic!
     var systemInfoCharacteristic: CBCharacteristic!
 
     /**
@@ -210,6 +211,9 @@ class PeripheralViewController: UIViewController, UITableViewDataSource, UITable
                             case "2A19":
                                 batteryCharacteristic = char
                                 print("Find Battery Characteristic ! uuid is \(batteryCharacteristic.uuid.uuidString)")
+                            case "4AA0":
+                                commandCharacteristic = char
+                                print("Find Command Characteristic ! uuid is \(commandCharacteristic.uuid.uuidString)")
                             case "4AA1":
                                 systemInfoCharacteristic = char
                                 print("Find System Info Characteristic ! uuid is \(systemInfoCharacteristic.uuid.uuidString)")
@@ -238,6 +242,9 @@ class PeripheralViewController: UIViewController, UITableViewDataSource, UITable
                         }
                         if let batteryInfo = batteryCharacteristic {
                             characteristicViewController.batteryCharacteristic = batteryInfo
+                        }
+                        if let command = commandCharacteristic {
+                            characteristicViewController.commandCharacteristic = command
                         }
                         if let systemInfo = systemInfoCharacteristic {
                             characteristicViewController.systemInfoCharacteristic = systemInfo

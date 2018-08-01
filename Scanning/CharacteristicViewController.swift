@@ -58,6 +58,7 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
 
     // Info Characteristic
     var batteryCharacteristic: CBCharacteristic!
+    var commandCharacteristic: CBCharacteristic!
     var systemInfoCharacteristic: CBCharacteristic!
 
     // BtNotify Library
@@ -78,13 +79,13 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
         centralManager.delegate = self
         blePeripheral.delegate = self
 
-        readSystemInfo()
         FotaSetting()
+        readSystemInfo()
     }
 
     @IBAction func notifyCharacteristic(_ sender: UISwitch) {
         printToConsole("notify the characteristic is \(sender.isOn)")
-        blePeripheral.peripheral.setNotifyValue(sender.isOn, for: connectedCharacteristic)
+        blePeripheral.peripheral.setNotifyValue(sender.isOn, for: commandCharacteristic)
     }
     /* Load UI elements */
     func loadUI() {
@@ -93,21 +94,25 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
         characteristicUuidlabel.text = connectedCharacteristic.uuid.uuidString
 
         // characteristic is not writeable
-        if !BlePeripheral.isCharacteristic(isWriteable: connectedCharacteristic) {
+        /*if !BlePeripheral.isCharacteristic(isWriteable: connectedCharacteristic) {
             writeCharacteristicTextField.isEnabled = false
             writeCharacteristicButton.isEnabled = false
-        }
+        }*/
         writeFOTAButton.isEnabled = false
         startTimeTextField.isEnabled = false
         durationTimeTextField.isEnabled = false
         consoleTextView.isEditable = false
         consoleTextView.isSelectable = false
-        blePeripheral.peripheral.setNotifyValue(true, for: connectedCharacteristic)
+        blePeripheral.peripheral.setNotifyValue(true, for: commandCharacteristic)
+        blePeripheral.peripheral.setNotifyValue(true, for: systemInfoCharacteristic)
     }
 
     func readSystemInfo() {
         if let battery = batteryCharacteristic {blePeripheral.readValue(from: battery)}
-        if let systemInfo = systemInfoCharacteristic {blePeripheral.readValue(from: systemInfo)}
+        if let systemInfo = systemInfoCharacteristic {
+            blePeripheral.readValue(from: systemInfo)
+            printToConsole("Read systemInfo from \(systemInfo.uuid.uuidString) !")
+        }
     }
 
     func FotaSetting() {
@@ -259,7 +264,7 @@ class CharacteristicViewController: UIViewController, CBCentralManagerDelegate, 
         writeCharacteristicButton.isEnabled = false
 
         let stringValue = generateCommandString()
-        blePeripheral.writeValue(value: stringValue, to: connectedCharacteristic)
+        blePeripheral.writeValue(value: stringValue, to: commandCharacteristic)
         writeCharacteristicTextField.text = ""
         writeCharacteristicButton.isEnabled = true
     }
