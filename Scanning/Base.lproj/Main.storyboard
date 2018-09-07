@@ -31,7 +31,7 @@
                                             <rect key="frame" x="8" y="8" width="303" height="21"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                             <accessibility key="accessibilityConfiguration" identifier="advertizedNameLabel"/>
-                                            <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                            <fontDescription key="fontDescription" type="system" pointSize="20"/>
                                             <nil key="textColor"/>
                                             <nil key="highlightedColor"/>
                                         </label>
@@ -70,9 +70,10 @@
                     <navigationItem key="navigationItem" title="Peripherals" id="qSz-wh-qOx">
                         <barButtonItem key="rightBarButtonItem" id="mj3-dP-bGK">
                             <button key="customView" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" id="lK7-3a-bDD">
-                                <rect key="frame" x="665" y="7" width="83" height="30"/>
+                                <rect key="frame" x="665" y="4" width="83" height="36"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <accessibility key="accessibilityConfiguration" identifier="scanButton"/>
+                                <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="20"/>
                                 <state key="normal" title="Scan"/>
                                 <connections>
                                     <action selector="onScanButtonClicked:" destination="ENM-tZ-xAA" eventType="primaryActionTriggered" id="tXk-Tr-M0O"/>
