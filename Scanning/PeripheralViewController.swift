@@ -21,6 +21,8 @@ class PeripheralViewController: UIViewController, CBCentralManagerDelegate, BleP
     @IBOutlet weak var waveformView: WaveformView!
     @IBOutlet weak var messageLabel: UILabel!
     @IBOutlet weak var playButton: UIButton!
+    @IBOutlet weak var batteryLabel: UILabel!
+    @IBOutlet weak var batteryLevel: BatteryLevel!
     
     // MARK: Connected Peripheral Properties
 
@@ -47,6 +49,8 @@ class PeripheralViewController: UIViewController, CBCentralManagerDelegate, BleP
     var buttonState = false
     var timerCounter: Int = 1200
     var timerOn = false
+    
+    
 
     /**
      UIView loaded
@@ -83,6 +87,9 @@ class PeripheralViewController: UIViewController, CBCentralManagerDelegate, BleP
         switch characteristic.uuid.uuidString {
         case "2A19":
             printToConsole("Battery characteristic received! battery is \(byteArray[0])%")
+            batteryLevel.level = CGFloat(byteArray[0]) / 100.0
+            batteryLabel.text = "\(byteArray[0])%"
+            if (byteArray[0]<=40) { batteryLevel.backgroundColor = UIColor.red }
         case "4AA0":
             var mode: Int = 0
             
@@ -133,7 +140,7 @@ class PeripheralViewController: UIViewController, CBCentralManagerDelegate, BleP
     let cmdType: [UInt16] = [0xAB01, 0xAB02, 0xAB03, 0xAB04, 0xAB05, 0xAB06, 0xAB07, 0xAB08, 0xAB09]
     var cmdData: [Bool] = [false, false, false, false, false, false, false, false, false]
     let comment = "FFFFFFFF"
-    let lastPressBtn: Int = 1
+    var lastPressBtn: Int = 6
     
     // Generate the command string by bigEndian.
     func generateCommandString() -> String {
@@ -148,8 +155,13 @@ class PeripheralViewController: UIViewController, CBCentralManagerDelegate, BleP
         
         let CMDDataValue = String(format: "%04X", cmdDataValue.bigEndian)
         
-        let Comment = String(repeating: comment, count: 6)
-        commandStr = Header + CMDType + CMDDataValue + Comment
+        if lastPressBtn == 6 {
+            let Comment = String(repeating: comment, count: 5)
+            commandStr = Header + CMDType + CMDDataValue + getCurrentDate() + Comment
+        } else {
+            let Comment = String(repeating: comment, count: 6)
+            commandStr = Header + CMDType + CMDDataValue + Comment
+        }
     
         cmdData[lastPressBtn] = !cmdData[lastPressBtn]
         cmdData[5] = false
@@ -169,6 +181,34 @@ class PeripheralViewController: UIViewController, CBCentralManagerDelegate, BleP
             let ch2Value = Int16(dataArray[111+i*2]) << 8 + Int16(dataArray[110+i*2])
             waveformView.pushSignal2BySliding(newValue: CGFloat(ch2Value))
         }
+    }
+    
+    func getCurrentDate() -> String {
+        
+        let date = Date()
+        let calender = Calendar.current
+        let components = calender.dateComponents([.year, .month, .day, .hour, .minute, .second], from: date)
+        
+        let year = components.year
+        let month = components.month
+        let day = components.day
+        let hour = components.hour
+        let minute = components.minute
+        let second = components.second
+        
+        let today_string = String(year!) + "-" + String(month!) + "-" + String(day!) + " " + String(hour!) + ":" + String(minute!) + ":"
+            + String(second!)
+        printToConsole(today_string)
+        
+        let byte1: UInt8 = UInt8(year!-2000) << 2 + UInt8(month!) >> 2
+        let byte2: UInt8 = (UInt8(month!) % 4) << 6 + UInt8(day!) << 1 + UInt8(hour!) >> 4
+        let byte3: UInt8 = (UInt8(hour!) % 16) << 4 + UInt8(minute!) >> 2
+        let byte4: UInt8 = (UInt8(minute!) % 4) << 6 + UInt8(second!)
+        
+        let currentTime = String(format: "%02X", byte4) + String(format: "%02X", byte3) +
+            String(format: "%02X", byte2) + String(format: "%02X", byte1)
+        printToConsole("currentTime in 4 bytes format is : " + currentTime)
+        return currentTime
     }
 
     // MARK: CBCentralManagerDelegate code
@@ -294,6 +334,10 @@ class PeripheralViewController: UIViewController, CBCentralManagerDelegate, BleP
         blePeripheral.peripheral.setNotifyValue(true, for: commandCharacteristic)
         blePeripheral.peripheral.setNotifyValue(true, for: systemInfoCharacteristic)
         readSystemInfo()
+        if lastPressBtn != 6 { lastPressBtn = 6 }
+        let stringValue = generateCommandString()
+        blePeripheral.writeValue(value: stringValue, to: commandCharacteristic)
+        lastPressBtn = 1
         messageLabel.text = "Ready!"
     }
     
@@ -301,7 +345,7 @@ class PeripheralViewController: UIViewController, CBCentralManagerDelegate, BleP
         if let battery = batteryCharacteristic {blePeripheral.readValue(from: battery)}
         if let systemInfo = systemInfoCharacteristic {
             blePeripheral.readValue(from: systemInfo)
-            printToConsole("Read systemInfo from \(systemInfo.uuid.uuidString) !")
+            //printToConsole("Read systemInfo from \(systemInfo.uuid.uuidString) !")
         }
     }
     
