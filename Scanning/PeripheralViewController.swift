@@ -108,17 +108,6 @@ class PeripheralViewController: UIViewController, CBCentralManagerDelegate, BleP
                 let dataArray = [UInt8](byteArray[12...])
                 if dataArray.count == 212 {
                     parseRealTimeMode(dataArray: dataArray)
-                } else {
-                    printToConsole("Receive data array length : \(dataArray.count)")
-                    if timerOn {
-                        timer.invalidate()
-                        timerCounter = 1200
-                        timerOn = false
-                    } else {
-                        timer = Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(updateSecondLabel), userInfo: nil, repeats: true)
-                        timer.fire()
-                        timerOn = true
-                    }
                 }
             default:
                 printToConsole("Parse mode not find, mode value is \(mode)")
@@ -173,6 +162,7 @@ class PeripheralViewController: UIViewController, CBCentralManagerDelegate, BleP
         cmdData[7] = false
         cmdData[8] = false
         printToConsole("The string will be write to peripheral: \(commandStr)")
+        printToConsole("The cmdData[1] is \(cmdData[lastPressBtn]) lastPressBtn is \(lastPressBtn)")
         return commandStr
     }
     
@@ -275,24 +265,33 @@ class PeripheralViewController: UIViewController, CBCentralManagerDelegate, BleP
         
         consoleTextView.isEditable = false
         consoleTextView.isSelectable = false
+        playButton.isEnabled = false
     }
     
     
     @IBAction func recordButtonPressed(_ sender: UIButton) {
+        resetTimerAndButton()
+    }
+    
+    func resetTimerAndButton() {
         if buttonState {
+            timer.invalidate()
             timerCounter = 1200
             let stringValue = generateCommandString()
             blePeripheral.writeValue(value: stringValue, to: commandCharacteristic)
             playButton.setTitle("Record!", for: .normal)
             playButton.backgroundColor = gressColor
             buttonState = false
+            timerOn = false
         } else {
-            timerCounter = 1200
             let stringValue = generateCommandString()
             blePeripheral.writeValue(value: stringValue, to: commandCharacteristic)
+            timer = Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(updateSecondLabel), userInfo: nil, repeats: true)
+            timer.fire()
             playButton.setTitle("Stop!", for: .normal)
             playButton.backgroundColor = redColor
             buttonState = true
+            timerOn = true
         }
     }
     
@@ -301,14 +300,7 @@ class PeripheralViewController: UIViewController, CBCentralManagerDelegate, BleP
             self.messageLabel.text = "Remaining seconds : \(Float(self.timerCounter)/10)"
         }
         if timerCounter == 0 {
-            timer.invalidate()
-            timerCounter = 1200
-            buttonState = false
-            timerOn = false
-            cmdData[lastPressBtn] = true
-            playButton.setTitle("Record!", for: .normal)
-            playButton.backgroundColor = gressColor
-            cmdData[lastPressBtn] = !cmdData[lastPressBtn]
+            resetTimerAndButton()
         } else {
             timerCounter -= 1
         }
@@ -349,6 +341,7 @@ class PeripheralViewController: UIViewController, CBCentralManagerDelegate, BleP
         blePeripheral.writeValue(value: stringValue, to: commandCharacteristic)
         lastPressBtn = 1
         messageLabel.text = "Ready!"
+        playButton.isEnabled = true
     }
     
     func readSystemInfo() {

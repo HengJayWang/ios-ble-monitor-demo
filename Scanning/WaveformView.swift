@@ -22,7 +22,7 @@ class WaveformView: UIView {
 
     var signal1Data = [CGFloat](repeating: CGFloat(UINT16_MAX >> 1), count: 2500) {
         didSet {
-            if (signal1Index + 1) % 500 == 0 { setNeedsDisplay() }
+            if (signal1Index + 1) % 250 == 0 { setNeedsDisplay() }
         }
     }
 
