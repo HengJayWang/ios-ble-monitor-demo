@@ -23,6 +23,9 @@ class PeripheralViewController: UIViewController, CBCentralManagerDelegate, BleP
     @IBOutlet weak var playButton: UIButton!
     @IBOutlet weak var batteryLabel: UILabel!
     @IBOutlet weak var batteryLevel: BatteryLevel!
+    @IBOutlet weak var ecgLabel: UILabel!
+    @IBOutlet weak var respLabel: UILabel!
+    
     
     // MARK: Connected Peripheral Properties
 
@@ -42,8 +45,8 @@ class PeripheralViewController: UIViewController, CBCentralManagerDelegate, BleP
     var systemInfoCharacteristic: CBCharacteristic!
     
     // Button UI
-    let gressColor = UIColor(red: 100.0/255.0, green: 221.0/255.0, blue: 23.0/255.0, alpha: 1.0)
-    let redColor = UIColor(red: 1.0, green: 45.0/255.0, blue: 60.0/255.0, alpha: 1.0)
+    let grassColor = #colorLiteral(red: 0.3921568627, green: 0.8666666667, blue: 0.09019607843, alpha: 1)
+    let redColor = #colorLiteral(red: 1, green: 0.1764705882, blue: 0.2352941176, alpha: 1)
     
     var timer = Timer()
     var buttonState = false
@@ -171,11 +174,15 @@ class PeripheralViewController: UIViewController, CBCentralManagerDelegate, BleP
         printToConsole("dataArray receive: \(dataArray.count) bytes, receiveCount: \(receiveCount)")
         for i in 1...50 {
             // Update the signal value of channel 1
-            let ch1Value = Int16(dataArray[11+i*2]) << 8 + Int16(dataArray[10+i*2])
+            let ch1Value = UInt16(dataArray[11+i*2]) << 8 + UInt16(dataArray[10+i*2])
             waveformView.pushSignal1BySliding(newValue: CGFloat(ch1Value))
             // Update the signal value of channel 2
-            let ch2Value = Int16(dataArray[111+i*2]) << 8 + Int16(dataArray[110+i*2])
+            let ch2Value = UInt16(dataArray[111+i*2]) << 8 + UInt16(dataArray[110+i*2])
             waveformView.pushSignal2BySliding(newValue: CGFloat(ch2Value))
+        }
+        if (waveformView.signal1Index % 250 == 0) {
+            ecgLabel.text = String(format: "ECG: Max: %5d (%.3f V) min: %5d (%.3f V)", UInt16(waveformView.signal1Max), waveformView.signal1Max / 65535.0 * 3.3, UInt16(waveformView.signal1Min), waveformView.signal1Min / 65535.0 * 3.3)
+            respLabel.text = String(format: "Resp: Max: %5d (%.3f V) min: %5d (%.3f V)", UInt16(waveformView.signal2Max), waveformView.signal2Max / 65535.0 * 3.3, UInt16(waveformView.signal2Min), waveformView.signal2Min / 65535.0 * 3.3)
         }
     }
     
@@ -259,7 +266,7 @@ class PeripheralViewController: UIViewController, CBCentralManagerDelegate, BleP
         playButton.layer.shadowRadius = 2.0
         playButton.layer.shadowOpacity = 0.5
         playButton.layer.cornerRadius = playButton.frame.width / 12
-        playButton.backgroundColor = gressColor
+        playButton.backgroundColor = grassColor
         
         messageLabel.text = "Connecting... "
         
@@ -280,7 +287,7 @@ class PeripheralViewController: UIViewController, CBCentralManagerDelegate, BleP
             let stringValue = generateCommandString()
             blePeripheral.writeValue(value: stringValue, to: commandCharacteristic)
             playButton.setTitle("Record!", for: .normal)
-            playButton.backgroundColor = gressColor
+            playButton.backgroundColor = grassColor
             buttonState = false
             timerOn = false
         } else {

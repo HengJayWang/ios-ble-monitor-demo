@@ -19,7 +19,13 @@ class BatteryLevel: UIView {
     }
     */
     
-    var level: CGFloat = 1.0 { didSet { setNeedsDisplay() } }
+    var level: CGFloat = 1.0 {
+        didSet {
+            UIView.animate(withDuration: 0.5) {
+                self.setNeedsDisplay()
+            }
+        }
+    }
     let batteryColor = UIColor.white
     
     override func draw(_ rect: CGRect) {
