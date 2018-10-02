@@ -25,6 +25,7 @@ class PeripheralViewController: UIViewController, CBCentralManagerDelegate, BleP
     @IBOutlet weak var batteryLevel: BatteryLevel!
     @IBOutlet weak var ecgLabel: UILabel!
     @IBOutlet weak var respLabel: UILabel!
+    @IBOutlet weak var saveDataButton: UIButton!
     
     
     // MARK: Connected Peripheral Properties
@@ -93,9 +94,11 @@ class PeripheralViewController: UIViewController, CBCentralManagerDelegate, BleP
         switch characteristic.uuid.uuidString {
         case "2A19":
             printToConsole("Battery characteristic received! battery is \(byteArray[0])%")
-            batteryLevel.level = CGFloat(byteArray[0]) / 100.0
-            batteryLabel.text = "\(byteArray[0])%"
-            if (byteArray[0]<=40) { batteryLevel.backgroundColor = UIColor.red }
+            UIView.animate(withDuration: 3) {
+                self.batteryLevel.level = CGFloat(byteArray[0]) / 100.0
+                self.batteryLabel.text = "\(byteArray[0])%"
+                if (byteArray[0]<=40) { self.batteryLevel.backgroundColor = UIColor.red }
+            }
         case "4AA0":
             var mode: Int = 0
             
@@ -260,19 +263,25 @@ class PeripheralViewController: UIViewController, CBCentralManagerDelegate, BleP
     }
 
     func loadUI() {
-        playButton.layer.shadowColor = UIColor.black.cgColor
-        playButton.layer.shadowOffset = CGSize(width: 0.0, height: 5.0)
-        playButton.layer.masksToBounds = false
-        playButton.layer.shadowRadius = 2.0
-        playButton.layer.shadowOpacity = 0.5
-        playButton.layer.cornerRadius = playButton.frame.width / 12
+        setBtnCorner(btn: playButton)
         playButton.backgroundColor = grassColor
+        
+        setBtnCorner(btn: saveDataButton)
         
         messageLabel.text = "Connecting... "
         
         consoleTextView.isEditable = false
         consoleTextView.isSelectable = false
         playButton.isEnabled = false
+    }
+    
+    func setBtnCorner(btn: UIButton) {
+        btn.layer.shadowColor = UIColor.black.cgColor
+        btn.layer.shadowOffset = CGSize(width: 0.0, height: 5.0)
+        btn.layer.masksToBounds = false
+        btn.layer.shadowRadius = 2.0
+        btn.layer.shadowOpacity = 0.5
+        btn.layer.cornerRadius = 20.0
     }
     
     

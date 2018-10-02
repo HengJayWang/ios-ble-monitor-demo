@@ -21,7 +21,7 @@ class BatteryLevel: UIView {
     
     var level: CGFloat = 1.0 {
         didSet {
-            UIView.animate(withDuration: 0.5) {
+            UIView.animate(withDuration: 5) {
                 self.setNeedsDisplay()
             }
         }
