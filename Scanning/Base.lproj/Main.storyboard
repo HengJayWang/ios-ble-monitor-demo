@@ -413,7 +413,7 @@
                                                             <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                                         </state>
                                                         <connections>
-                                                            <action selector="exportData:" destination="fta-Q8-EfI" eventType="touchUpInside" id="xRl-AT-cfu"/>
+                                                            <action selector="exportData:" destination="fta-Q8-EfI" eventType="touchUpInside" id="8xp-bO-2SZ"/>
                                                         </connections>
                                                     </button>
                                                 </subviews>

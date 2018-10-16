@@ -8,6 +8,7 @@
 
 import UIKit
 import CoreData
+import MessageUI
 
 class DataTableViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
  
@@ -93,10 +94,6 @@ class DataTableViewController: UIViewController, UITableViewDelegate, UITableVie
         
     }
     
-    @IBAction func exportData(_ sender: UIButton) {
-        
-    }
-    
     func loadUI() {
         setBtnCorner(btn: saveButton)
         setBtnCorner(btn: exportButton)
@@ -110,14 +107,10 @@ class DataTableViewController: UIViewController, UITableViewDelegate, UITableVie
         let patient = Patient(context: context)
         
         patient.energy = Int16(energyValue)
-        print("energy is \(patient.energy)")
         patient.blood = Int16(bloodValue)
-        print("blood is \(patient.blood)")
         patient.syndrome = syndromeTextfield.text
-        print("syndrome is \(patient.syndrome!)")
-        patient.date = getCurrentDate()
-        print("date is \(patient.date!)")
-        
+        patient.date = getCurrentDate(space: true)
+ 
         print("Ready save to Core Data Container...")
         do {
             try context.save()
@@ -185,7 +178,7 @@ class DataTableViewController: UIViewController, UITableViewDelegate, UITableVie
         dataTable.reloadData()
     }
     
-    func getCurrentDate() -> String {
+    func getCurrentDate(space: Bool) -> String {
         
         let date = Date()
         let calender = Calendar.current
@@ -198,15 +191,136 @@ class DataTableViewController: UIViewController, UITableViewDelegate, UITableVie
         let minute = components.minute
         let second = components.second
         
-        let dateString = String(format: "%4d", year!) + "-"
-                       + String(format: "%02d", month!) + "-"
-            + String(format: "%02d", day!) + "  "
-            + String(format: "%02d", hour!) + ":"
-            + String(format: "%02d", minute!) + ":"
-            + String(format: "%02d", second!)
-        print(dateString)
+        if space {
+            let dateString = String(format: "%4d", year!) + "-"
+                + String(format: "%02d", month!) + "-"
+                + String(format: "%02d", day!) + "  "
+                + String(format: "%02d", hour!) + ":"
+                + String(format: "%02d", minute!) + ":"
+                + String(format: "%02d", second!)
+            
+            return dateString
+        } else {
+            let dateString = String(format: "%4d", year!) + "-"
+                + String(format: "%02d", month!) + "-"
+                + String(format: "%02d", day!) + "_"
+                + String(format: "%02d", hour!) + "_"
+                + String(format: "%02d", minute!) + "_"
+                + String(format: "%02d", second!)
+            
+            return dateString
+        }
         
-        return dateString
     }
     
+}
+
+extension DataTableViewController: MFMailComposeViewControllerDelegate {
+    
+    enum MIMEType: String {
+        case jpg = "image/jpeg"
+        case png = "image/png"
+        case doc = "application/msword"
+        case ppt = "application/vnd.ms-powerpoint"
+        case html = "text/html"
+        case csv = "text/csv"
+        case pdf = "application/pdf"
+        
+        init?(type: String) {
+            switch type.lowercased() {
+            case "jpg": self = .jpg
+            case "png": self = .png
+            case "doc": self = .doc
+            case "ppt": self = .ppt
+            case "html": self = .html
+            case "csv": self = .csv
+            case "pdf": self = .pdf
+            default: return nil
+            }
+        }
+    }
+    
+    func mailComposeController(_ controller: MFMailComposeViewController, didFinishWith result: MFMailComposeResult, error: Error?) {
+        
+        switch result {
+        case .cancelled:
+            print("Mail cancelled")
+        case .saved:
+            print("Mail saved")
+        case .sent:
+            print("Mail sent")
+        case .failed:
+            print("Failed to send: \(error?.localizedDescription ?? "")")
+        default:
+            print("Failed to send: \(error?.localizedDescription ?? "")")
+        }
+        
+        dismiss(animated: true, completion: nil)
+        
+    }
+    
+    @IBAction func exportData(_ sender: UIButton) {
+        
+        let csvText = generateCSVText()
+        
+        let fileName = "Patients_Data_" + getCurrentDate(space: false) + ".csv"
+        
+        let path = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(fileName)
+        
+        do {
+            try csvText.write(to: path , atomically: true, encoding: String.Encoding.utf8)
+            print("Write Success !")
+        } catch {
+            print("Failed to create file")
+            print("\(error)")
+        }
+        
+        // check device will able to send email
+        guard MFMailComposeViewController.canSendMail() else {
+            print("This device doesn't allow you to send mail.")
+            return
+        }
+        
+        let emailTitle = "TCM Patient Data: .csv File"
+        let messageBody = "Testing for export .csv file from my iPad app."
+        let toRecipients = ["hengjay.wang@itri.org.tw"]
+        
+        // init the mail composor and fill content
+        let mailComposer = MFMailComposeViewController()
+        mailComposer.mailComposeDelegate = self
+        mailComposer.setSubject(emailTitle)
+        mailComposer.setMessageBody(messageBody, isHTML: false)
+        mailComposer.setToRecipients(toRecipients)
+        
+        // recognize the file name and extension
+        let fileparts = fileName.components(separatedBy: ".")
+        let filename = fileparts[0]
+        let fileExtension = fileparts[1]
+        
+        
+        // Get file data and MIME type
+        if let fileData = try? Data(contentsOf: path), let mimeType = MIMEType(type: fileExtension) {
+            
+            // add attachment
+            mailComposer.addAttachmentData(fileData, mimeType: mimeType.rawValue, fileName: filename + "." + fileExtension)
+            
+            // show mail controller
+            present(mailComposer, animated: true, completion: nil)
+            
+        }
+    }
+    
+    func generateCSVText() -> String {
+        
+        var csvText = "Energy,Blood,Syndrome,Date\n"
+        
+        fetchData()
+        
+        for patient in patients {
+            let newLine = "\(String(format: "%2d", patient.energy)),\(String(format: "%2d", patient.blood)),\(patient.syndrome!),\(patient.date!)\n"
+            csvText += newLine
+        }
+        
+        return csvText
+    }
 }
